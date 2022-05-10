@@ -5,8 +5,10 @@
 | 胡珂雅 [lillian039](https://github.com/lillian039) | B+树         | 前端设计与网页服务器 |
 | 肖景琦 [xjq817](https://github.com/xjq817)         | 主题逻辑     | 前后端交互与通信     |
 
-实现要求：[ACMClassCourse-2021/TicketSystem: Data Structure 2022 homework](https://github.com/ACMClassCourse-2021/TicketSystem)
+实现要求：[实现要求](https://github.com/lillian039/TrainTicketSystem2022/blob/main/back_end/实现要求.md)
 
-后端开发文档：[火车票后端开发文档](https://github.com/lillian039/TrainTicketSystem2022/blob/main/火车票开发文档.md)
+整体信息：[ACMClassCourse-2021/TicketSystem: Data Structure 2022 homework](https://github.com/ACMClassCourse-2021/TicketSystem)
 
-前端开发文档：[前端部分开发文档](https://github.com/lillian039/TrainTicketSystem2022/blob/main/前端部分开发文档.md)
+后端开发文档：[火车票后端开发文档](https://github.com/lillian039/TrainTicketSystem2022/blob/main/back_end/火车票开发文档.md)
+
+前端开发文档：[前端部分开发文档](https://github.com/lillian039/TrainTicketSystem2022/blob/main/front_end/前端部分开发文档.md)
