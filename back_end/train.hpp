@@ -18,6 +18,10 @@ struct station{
 	friend bool operator < (const station& lhs,const station& rhs){
 		return lhs.hashe<rhs.hashe;
 	}
+	
+	friend bool operator > (const station& lhs,const station& rhs){
+		return lhs.hashe>rhs.hashe;
+	}
 
 	friend bool operator == (const station& lhs,const station& rhs){
 		return lhs.hashe==rhs.hashe;
