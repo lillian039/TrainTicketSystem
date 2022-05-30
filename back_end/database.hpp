@@ -28,7 +28,7 @@ public:
     void remove(int idx){}
     //根据bptree索引搜到的文件位置找到数据 并进行空间回收
 
-    void insert(T value,int time=0){}
+    int insert(T value,int time=0){}
     //插入新的数据组
 };
 

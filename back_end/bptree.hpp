@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "bufferList.hpp"
+
 template<class Key, class T, int M = 10, int L = 100>//M 阶BPT 块中数据为L M L均为偶数
 //B+树维护索引
 //文件*2 bptree主体 leaf结构
@@ -17,23 +18,27 @@ private:
     int sum_data;//数据条数
     const int len_of_head_leaf = 4 * sizeof(int);
     const int len_of_head_node = 3 * sizeof(int);
+
     struct Node {
         bool is_leaf;
-        int pos,n,father;//pos 所在的位置 n个关键字 父节点所在位置
+        int pos, n, father;//pos 所在的位置 n个关键字 父节点所在位置
         int A[M + 1];//大于、小于关键字的地址
         std::pair<Key, T> K[M];//关键字 K[n]中记录A[n+1]中的最小元素 保证关键字严格不同？
-        int position(){
+        int position() {
             return pos;
         }
     };
+
     struct Leaf {
-        int nxt, fro,pos;//顺序查找的上一块/下一位地址 它本身所在的地址
+        int nxt, fro, pos;//顺序查找的上一块/下一位地址 它本身所在的地址
         int n;//n个数据
         std::pair<Key, T> value[L];
-        int position(){
+
+        int position() {
             return pos;
         }
     };
+
     bufferList<Node> node_buffer;
     bufferList<Leaf> leaf_buffer;
     Node p, fa, root;//p 当前节点 fa 父节点 root节点
@@ -54,21 +59,21 @@ private:
             file_leaf.seekg(empty_leaf * sizeof(Leaf) + 4 * sizeof(int));
             file_leaf.read(reinterpret_cast<char *>(&empty_leaf), sizeof(int));
         } else index_new = ++rear_leaf;
-        tmp.pos=index_new;
+        tmp.pos = index_new;
         //更新fro
         Leaf nxt;
         int index_next = leaf.nxt;
         if (index_next) {
-            std::pair<bool,Leaf> buffer;
-            buffer=leaf_buffer.find(index_next);
-            if(buffer.first)nxt=buffer.second;
+            std::pair<bool, Leaf> buffer;
+            buffer = leaf_buffer.find(index_next);
+            if (buffer.first)nxt = buffer.second;
             else {
-                file_leaf.seekg(index_next * sizeof(Node)+ len_of_head_leaf);
+                file_leaf.seekg(index_next * sizeof(Node) + len_of_head_leaf);
                 file_leaf.read(reinterpret_cast<char *>(&nxt), sizeof(Leaf));
                 nxt.fro = index_new;
-                buffer=leaf_buffer.insert(nxt);
-                if(buffer.first) {
-                    file_leaf.seekg(buffer.second.pos*sizeof(Leaf) + len_of_head_leaf);
+                buffer = leaf_buffer.insert(nxt);
+                if (buffer.first) {
+                    file_leaf.seekg(buffer.second.pos * sizeof(Leaf) + len_of_head_leaf);
                     file_leaf.write(reinterpret_cast<char *>(&buffer.second), sizeof(Leaf));
                 }
             }
@@ -117,39 +122,38 @@ private:
                     file_tree.seekg(empty_tree * sizeof(Node) + len_of_head_node);
                     file_tree.read(reinterpret_cast<char *>(&empty_tree), sizeof(int));
                 } else root_index = ++rear_tree;
-                new_root.pos=root_index;
+                new_root.pos = root_index;
                 fa = new_root;
-            }
-            else {
-                std::pair<bool,Node>buffer;
-                buffer=node_buffer.find(p.father);
-                if(buffer.first)fa=buffer.second;
-                else{
+            } else {
+                std::pair<bool, Node> buffer;
+                buffer = node_buffer.find(p.father);
+                if (buffer.first)fa = buffer.second;
+                else {
                     file_leaf.seekg(p.father * sizeof(Node) + len_of_head_node);
                     file_leaf.read(reinterpret_cast<char *>(&fa), sizeof(Node));
-                    buffer=node_buffer.insert(fa);
-                    if(buffer.first){
+                    buffer = node_buffer.insert(fa);
+                    if (buffer.first) {
                         file_leaf.seekg(buffer.second.pos * sizeof(Node) + len_of_head_node);
                         file_leaf.write(reinterpret_cast<char *>(&buffer.second), sizeof(Node));
                     }
                 }
-                int pos= binary_search_node(p.K[0],fa);//todo 暂时不知道会搜到哪个位置可能是pos+1吧后期再调整qnqq琦琦没有多的笔
-                for(int i=p.n;i>=pos;i--)p.A[i]=p.A[i-1],p.K[i]=p.K[i-1];//todo K应该会少一个但现在没有草稿纸就先这样
+                int pos = binary_search_node(p.K[0], fa);//todo 暂时不知道会搜到哪个位置可能是pos+1吧后期再调整qnqq琦琦没有多的笔
+                for (int i = p.n; i >= pos; i--)p.A[i] = p.A[i - 1], p.K[i] = p.K[i - 1];//todo K应该会少一个但现在没有草稿纸就先这样
                 //todo 调整节点的位置
             }
-            new_node.pos=new_index,new_node.father=fa.pos;
-            std::pair<bool,Node>buffer;
-            buffer=node_buffer.insert(p);
-            if(buffer.first){
-                file_tree.seekg(buffer.second.pos*sizeof(Node)+len_of_head_node);
+            new_node.pos = new_index, new_node.father = fa.pos;
+            std::pair<bool, Node> buffer;
+            buffer = node_buffer.insert(p);
+            if (buffer.first) {
+                file_tree.seekg(buffer.second.pos * sizeof(Node) + len_of_head_node);
                 file_tree.write(reinterpret_cast<char *>(&buffer.second), sizeof(Node));
             }
-            buffer=node_buffer.insert(new_node);
-            if(buffer.first){
-                file_tree.seekg(buffer.second.pos*sizeof(Node)+len_of_head_node);
+            buffer = node_buffer.insert(new_node);
+            if (buffer.first) {
+                file_tree.seekg(buffer.second.pos * sizeof(Node) + len_of_head_node);
                 file_tree.write(reinterpret_cast<char *>(&buffer.second), sizeof(Node));
             }
-            p=fa;
+            p = fa;
         }
     }
 
@@ -174,9 +178,9 @@ public:
             file_leaf.open(file_leaf_name, std::ios::out);
             int num = 0;           //所有节点的地址都是0_base的
             Node t_n;            //初始化一个根，一个叶子
-            t_n.is_leaf = 1, t_n.n = 0, t_n.A[0] = 0,t_n.pos=1;//根节点放在1
+            t_n.is_leaf = 1, t_n.n = 0, t_n.A[0] = 0, t_n.pos = 1;//根节点放在1
             Leaf l_n;
-            l_n.nxt = 0, l_n.fro = 0, l_n.n = 0,l_n.pos=0;
+            l_n.nxt = 0, l_n.fro = 0, l_n.n = 0, l_n.pos = 0;
             file_leaf.seekg(0);
             file_tree.seekg(0);
             for (int i = 1; i <= 4; i++)file_leaf.write(reinterpret_cast<char *>(&num), sizeof(int));//初始化叶子
@@ -185,7 +189,7 @@ public:
             for (int i = 1; i <= 2; i++)file_tree.write(reinterpret_cast<char *>(&num), sizeof(int));//初始化索引树
             num = 0;
             file_tree.write(reinterpret_cast<char *>(&num), sizeof(int));
-            file_tree.seekg(len_of_head_node+ sizeof(Node));
+            file_tree.seekg(len_of_head_node + sizeof(Node));
             file_tree.write(reinterpret_cast<char *>(&t_n), sizeof(Node));
             file_tree.close();
             file_leaf.close();
@@ -196,7 +200,7 @@ public:
         file_tree.read(reinterpret_cast<char *>(&root_tree), sizeof(int));
         file_tree.read(reinterpret_cast<char *>(&empty_tree), sizeof(int));
         file_tree.read(reinterpret_cast<char *>(&rear_tree), sizeof(int));
-        file_tree.seekg(len_of_head_node+ root_tree*sizeof(Node));
+        file_tree.seekg(len_of_head_node + root_tree * sizeof(Node));
         file_tree.read(reinterpret_cast<char *>(&root), sizeof(Node));
         file_leaf.read(reinterpret_cast<char *>(&root_leaf), sizeof(int));
         file_leaf.read(reinterpret_cast<char *>(&empty_leaf), sizeof(int));
@@ -211,21 +215,21 @@ public:
         file_tree.write(reinterpret_cast<char *>(&empty_tree), sizeof(int));
         file_tree.write(reinterpret_cast<char *>(&rear_tree), sizeof(int));
         file_tree.seekg(root.pos);
-        file_tree.write(reinterpret_cast<char*>(&root), sizeof(Node));
-        while(!node_buffer.empty()){
-            Node buffer=node_buffer.pop_back();
-            file_tree.seekg(buffer.pos* sizeof(Node)+len_of_head_node);
+        file_tree.write(reinterpret_cast<char *>(&root), sizeof(Node));
+        while (!node_buffer.empty()) {
+            Node buffer = node_buffer.pop_back();
+            file_tree.seekg(buffer.pos * sizeof(Node) + len_of_head_node);
             file_tree.write(reinterpret_cast<char *>(&buffer), sizeof(Node));
         }
-        file_tree.seekg(len_of_head_node+ root_tree*sizeof(Node));
+        file_tree.seekg(len_of_head_node + root_tree * sizeof(Node));
         file_tree.write(reinterpret_cast<char *>(&root), sizeof(Node));
         file_leaf.write(reinterpret_cast<char *>(&root_leaf), sizeof(int));
         file_leaf.write(reinterpret_cast<char *>(&empty_leaf), sizeof(int));
         file_leaf.write(reinterpret_cast<char *>(&rear_leaf), sizeof(int));
         file_leaf.write(reinterpret_cast<char *>(&sum_data), sizeof(int));
-        while(!leaf_buffer.empty()){
-            Leaf buffer=leaf_buffer.pop_back();
-            file_tree.seekg(buffer.pos* sizeof(Node)+len_of_head_leaf);
+        while (!leaf_buffer.empty()) {
+            Leaf buffer = leaf_buffer.pop_back();
+            file_tree.seekg(buffer.pos * sizeof(Node) + len_of_head_leaf);
             file_tree.write(reinterpret_cast<char *>(&buffer), sizeof(Leaf));
         }
         file_tree.close();
@@ -243,30 +247,30 @@ public:
         while (!p.is_leaf) {
             int now = 0;
             while (now < p.n && val >= p.K[now])now++;//K[n]中记录A[n+1]中的最小元素
-            std::pair<bool,Node> buffer=node_buffer.find(p.A[now]);
-            if(buffer.first)p=buffer.second;
-            else{
+            std::pair<bool, Node> buffer = node_buffer.find(p.A[now]);
+            if (buffer.first)p = buffer.second;
+            else {
                 index_node = p.A[now] * sizeof(Node) + 3 * sizeof(int);
                 file_tree.seekg(index_node);
                 file_tree.read(reinterpret_cast<char *>(&p), sizeof(Node));
-                buffer=node_buffer.insert(p);
-                if(buffer.first){
-                    file_tree.seekg(buffer.second.pos* sizeof(Node)+len_of_head_node);
+                buffer = node_buffer.insert(p);
+                if (buffer.first) {
+                    file_tree.seekg(buffer.second.pos * sizeof(Node) + len_of_head_node);
                     file_tree.write(reinterpret_cast<char *>(&buffer.second), sizeof(Node));
                 }
             }
         }
-        int now = binary_search_node(val,p);
-       // while (now < p.n && val >= p.K[now])now++;//K[n]中记录A[n+1]中的最小元素
-        std::pair<bool,Leaf> buffer=leaf_buffer.find(p.A[now]);
-        if(buffer.first)leaf=buffer.second;
+        int now = binary_search_node(val, p);
+        // while (now < p.n && val >= p.K[now])now++;//K[n]中记录A[n+1]中的最小元素
+        std::pair<bool, Leaf> buffer = leaf_buffer.find(p.A[now]);
+        if (buffer.first)leaf = buffer.second;
         else {
             index_leaf = p.A[now] * sizeof(Leaf) + 4 * sizeof(int);
             file_leaf.seekg(index_leaf);
             file_leaf.read(reinterpret_cast<char *>(&leaf), sizeof(Leaf));
-            buffer=leaf_buffer.insert(leaf);
-            if(buffer.first){
-                file_leaf.seekg(buffer.second.pos*sizeof (Leaf)+len_of_head_leaf);
+            buffer = leaf_buffer.insert(leaf);
+            if (buffer.first) {
+                file_leaf.seekg(buffer.second.pos * sizeof(Leaf) + len_of_head_leaf);
                 file_leaf.write(reinterpret_cast<char *>(&buffer.second), sizeof(Leaf));
             }
         }
@@ -288,11 +292,11 @@ public:
     }
 
     //通过键值删除 并进行空间回收
-    void remove(const std::pair<Key,T>&val) {}
+    void remove(const std::pair<Key, T> &val) {}
 
-    //支持一对多键值查找
-    std::pair<bool,std::vector<T>> find(const Key &key) {
-        std::pair<bool,std::vector<T>> ans;
+    //一对一键值查找
+    std::pair<bool, T> find(const Key &key) {
+        std::pair<bool, std::vector<T>> ans;
         p = root;
         int index_node, index_leaf;
         while (!p.is_leaf) {
@@ -309,27 +313,62 @@ public:
         file_tree.read(reinterpret_cast<char *>(&leaf), sizeof(Leaf));
         int pos = binary_search_key(key);
         while (pos >= 0 && leaf.value[pos].first == key)ans.second.push_back(leaf.value[pos--].second);
-        if(ans.second.empty())ans.first=false;
-        else ans.first=true;
+        if (ans.second.empty())ans.first = false;
+        else ans.first = true;
         return ans;
     }
 
+    //一对多键值查找
+    std::pair<bool, std::vector<T>> Find(const Key &key) {
+        std::pair<bool, std::vector<T>> ans;
+        p = root;
+        while (!p.is_leaf) {
+            int now = binary_search_node(key);
+            find_node(p, p.A[now]);
+        }
+        int now = binary_search_node(key);
+        find_leaf(leaf, now);
+        now = binary_search_leaf(key);
+        if (leaf.value[now].first != key) {
+            ans.first = false;
+            return ans;
+        } else ans.first = true;
+        //向前搜
+        if (leaf.fro && now == 0) {
+            Leaf pre;
+            find_leaf(pre, leaf.fro);
+            int idx = pre.n - 1;
+            while (idx >= 0 && leaf.value[idx].first == key)idx--;
+            while (idx < pre.n && leaf.value[idx].first == key)ans.second.push_back(leaf.value[idx++].second);
+        }
+        while (now < leaf.n && leaf.value[now].first == key)ans.second.push_back(leaf.value[now++].second);
+        while (leaf.nxt && now == leaf.n) {
+            find_leaf(leaf, leaf.nxt);
+            now = 0;
+            while (now < leaf.n && leaf.value[now].first == key)ans.second.push_back(leaf.value[now++].second);
+        }
+        return ans;
+    }
 
+    //修改T
+    void modify(const std::pair<Key, T> &val) {}
+
+    //遍历 用来调代码
     void traverse() {
         leaf.nxt = root_leaf;
         while (leaf.nxt) {
-            std::pair<bool,Leaf> buffer=leaf_buffer.find(leaf.nxt);
-            if(buffer.first)leaf=buffer.second;
+            std::pair<bool, Leaf> buffer = leaf_buffer.find(leaf.nxt);
+            if (buffer.first)leaf = buffer.second;
             else {
                 file_leaf.seekg(leaf.nxt * sizeof(Leaf) + len_of_head_leaf);
                 file_leaf.read(reinterpret_cast<char *>(&leaf), sizeof(Leaf));
-                buffer=leaf_buffer.insert(leaf);
-                if(buffer.first){
+                buffer = leaf_buffer.insert(leaf);
+                if (buffer.first) {
                     file_leaf.seekg(buffer.second.pos * sizeof(Leaf) + len_of_head_leaf);
                     file_leaf.read(reinterpret_cast<char *>(&buffer.second), sizeof(Leaf));
                 }
             }
-            for (int i = 0; i < leaf.n; i++)std::cout << leaf.value[i].first<<" "<<leaf.value[i].second << "    ";
+            for (int i = 0; i < leaf.n; i++)std::cout << leaf.value[i].first << " " << leaf.value[i].second << "    ";
             std::cout << std::endl;
         }
     }
@@ -346,7 +385,17 @@ private:
         return l;
     }
 
-    int binary_search_key(const Key &key){//?
+    int binary_search_node(const std::pair<Key, T> &val, const Node &node) {
+        int l = 0, r = node.n - 1;
+        while (l < r) {
+            int mid = (l + r + 1) / 2;
+            if (node.K[mid] >= val)r = mid - 1;
+            else l = mid;
+        }
+        return l;
+    }
+
+    int binary_search_leaf(const Key &key) {
         int l = 0, r = leaf.n - 1;
         while (l < r) {
             int mid = (l + r + 1) / 2;
@@ -356,15 +405,44 @@ private:
         return l;
     }
 
-    int binary_search_node(const std::pair<Key,T>&val,const Node &node){
-        int l = 0, r =  node.n-1;
+    int binary_search_node(const Key &key) {//?
+        int l = 0, r = leaf.n - 1;
         while (l < r) {
             int mid = (l + r + 1) / 2;
-            if (node.K[mid] >= val)r = mid - 1;
+            if (leaf.value[mid].first >= key)r = mid - 1;
             else l = mid;
         }
         return l;
     }
+
+    void find_node(Node &n, int pos) {
+        std::pair<bool, Node> buffer = node_buffer.find(pos);
+        if (buffer.first)n = buffer.second;
+        else {
+            file_tree.seekg(pos * sizeof(Node) + len_of_head_node);
+            file_tree.write(reinterpret_cast<char *>(&n), sizeof(Node));
+            buffer = node_buffer.insert(n);
+            if (buffer.first) {
+                file_tree.seekg(buffer.second.pos * sizeof(Node) + len_of_head_node);
+                file_tree.write(reinterpret_cast<char *>(&buffer.second), sizeof(Node));
+            }
+        }
+    }
+
+    void find_leaf(Leaf &l, int pos) {
+        std::pair<bool, Leaf> buffer = leaf_buffer.find(pos);
+        if (buffer.first)l = buffer.second;
+        else {
+            file_leaf.seekg(pos * sizeof(Leaf) + len_of_head_leaf);
+            file_leaf.write(reinterpret_cast<char *>(&l), sizeof(Leaf));
+            buffer = leaf_buffer.insert(l);
+            if (buffer.first) {
+                file_leaf.seekg(buffer.second.pos * sizeof(Leaf) + len_of_head_leaf);
+                file_leaf.write(reinterpret_cast<char *>(&buffer.second), sizeof(Leaf));
+            }
+        }
+    }
+
 };
 
 
