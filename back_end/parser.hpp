@@ -5,8 +5,14 @@
 #include "train.hpp"
 #include "error.hpp"
 
-sjtu::vector<std::string> parser(std::string command_line){}
+sjtu::vector<std::string> parser(std::string command_line)
+{
 
-void parse_command(std::string command_line){}
+}
+
+void parse_command(std::string command_line)
+{
+    
+}
 
 #endif

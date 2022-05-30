@@ -2,6 +2,7 @@
 #define USER_HPP
 
 #include <iostream>
+
 #include "string.hpp"
 #include "linked_hashmap.hpp"
 #include "bptree.hpp"
@@ -86,12 +87,12 @@ private:
 public:
 	user_management()
 	{
-		bpt_users("user.txt");
+		bpt_users("bpt_users");
 	}
 
 	//成功返回1 否则为0
 	//每个函数进去之前都要判一下长度是否合法
-	bool add_user(
+	std::pair<bool, string> add_user(
 		const string &cur_username, const string &username,
 		const string &password, const string &realname,
 		const string &mailaddr, int privilege)
@@ -105,89 +106,102 @@ public:
 			int ch = cu.toint();
 			std::pair<bool, user> x = bpt_users.find(ch);
 			if (!x.first)
-				return false;
+				return std::pair<bool, string>(false, "-1\n");
 			//没有原用户
 			if (log_in.find(ch) == log_in.end())
-				return false;
+				return std::pair<bool, string>(false, "-1\n");
 			//原用户未登录
 			if (x.second.get_privilege() <= privilege)
-				return false;
+				return std::pair<bool, string>(false, "-1\n");
 			//权限限制
 			sjtu::my_str<20> u = username;
 			if (bpt_users.find(u.toint()).first)
-				return false;
+				return std::pair<bool, string>(false, "-1\n");
 			//新用户已经注册
 		}
 		user new_user{username, password, realname, mailaddr, privilege};
-		bpt_users.insert(new_user.get_hashe(), new_user);
-		return true;
+		bpt_users.insert(std::pair<int, user>(new_user.get_hashe(), new_user));
+		return std::pair<bool, string>(true, "0\n");
 	}
 
-	bool login(const string &username, const string &password)
+	std::pair<bool, string> login(const string &username, const string &password)
 	{
 		sjtu::my_str<20> u = username;
 		int uh = u.toint();
 		if (log_in.find(uh) != log_in.end())
-			return false;
+			return std::pair<bool, string>(false, "-1\n");
 		//用户已登录
 		std::pair<bool, user> x = bpt_users.find(uh);
 		if (!x.first)
-			return false;
+			return std::pair<bool, string>(false, "-1\n");
 		//用户不存在
 		sjtu::my_str<30> p = password;
 		if (x.second.get_hash_password() != p.toint())
-			return false;
+			return std::pair<bool, string>(false, "-1\n");
 		//密码错误
 		log_in[uh] = true;
-		return true;
+		return std::pair<bool, string>(true, "0\n");
 	}
 
-	bool logout(const string &username)
+	std::pair<bool, string> logout(const string &username)
 	{
 		sjtu::my_str<20> u = username;
 		int uh = u.toint();
 		if (log_in.find(uh) == log_in.end())
-			return false;
+			return std::pair<bool, string>(false, "-1\n");
 		log_in.erase(log_in.find(uh));
-		return true;
+		return std::pair<bool, string>(true, "0\n");
 	}
 
-	std::pair<bool,string> query_profile(const string &cur_username, const string &username)
+	std::pair<bool, string> query_profile(const string &cur_username, const string &username)
 	{
 		sjtu::my_str<20> cu = cur_username, u = username;
 		int ch = cu.toint(), uh = u.toint();
 		if (log_in.find(ch) == log_in.end())
-			return std::pair<bool,string>(false,"-1");
+			return std::pair<bool, string>(false, "-1\n");
 		//原用户未登录
 		std::pair<bool, user> xc = bpt_users.find(ch), xu = bpt_users.find(uh);
 		if (!xc.first || !xu.first)
-			return std::pair<bool,string>(false,"-1");
+			return std::pair<bool, string>(false, "-1\n");
 		//原用户或新用户不存在
 		if (xc.second.get_privilege() < xu.second.get_privilege())
-			return std::pair<bool,string>(false,"-1");
+			return std::pair<bool, string>(false, "-1\n");
 		//原用户权限<新用户
-		return xu.second.username+" "+xu.second.realname+" "+xu.second.mailaddr+" "+xu.second.privilege;
+		return std::pair<bool, string>(true, username + " " + xu.second.get_realname() +
+												 " " + xu.second.get_mailaddr() +
+												 " " + to_String(xu.second.get_privilege()) + "\n");
 	}
 
-	std::pair<bool,string> modify_profile(
+	std::pair<bool, string> modify_profile(
 		const string &cur_username, const string &username,
 		const string &password, const string &realname,
-		const string &mailaddr, int privilege)
+		const string &mailaddr, const int &privilege)
 	{
 		sjtu::my_str<20> cu = cur_username, u = username;
 		int ch = cu.toint(), uh = u.toint();
 		if (log_in.find(ch) == log_in.end())
-			return std::pair<bool,string>(false,"-1");
+			return std::pair<bool, string>(false, "-1\n");
 		//原用户未登录
 		std::pair<bool, user> xc = bpt_users.find(ch), xu = bpt_users.find(uh);
 		if (!xc.first || !xu.first)
-			return std::pair<bool,string>(false,"-1");
+			return std::pair<bool, string>(false, "-1\n");
 		//原用户或新用户不存在
 		if (xc.second.get_privilege() < xu.second.get_privilege())
-			return std::pair<bool,string>(false,"-1");
+			return std::pair<bool, string>(false, "-1\n");
 		//原用户权限<新用户
 		if (xc.second.get_privilege() <= privilege)
-			return std::pair<bool,string>(false,"-1");
-		if (password!="") 
+			return std::pair<bool, string>(false, "-1\n");
+		if (password != "")
+			xu.second.modify_password(password);
+		if (realname != "")
+			xu.second.modify_realname(realname);
+		if (mailaddr != "")
+			xu.second.modify_mailaddr(mailaddr);
+		if (privilege >= 0)
+			xu.second.modify_privilege(privilege);
+		bpt_users.modify(std::pair<int, uset>(uh, xu));
+		return std::pair<bool, string>(true, username + " " + xu.second.get_realname() +
+												 " " + xu.second.get_mailaddr() +
+												 " " + to_String(xu.second.get_privilege()) + "\n");
 	}
-}
+};
