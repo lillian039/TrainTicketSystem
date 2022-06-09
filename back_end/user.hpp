@@ -90,6 +90,11 @@ public:
 		bpt_users("bpt_users");
 	}
 
+	bool is_log_in(const int &hashe)
+	{
+		return log_in.find(hashe) != log_in.end();
+	}
+
 	//成功返回1 否则为0
 	//每个函数进去之前都要判一下长度是否合法
 	std::pair<bool, string> add_user(
@@ -128,7 +133,7 @@ public:
 	{
 		sjtu::my_str<20> u = username;
 		int uh = u.toint();
-		if (log_in.find(uh) != log_in.end())
+		if (is_log_in(uh))
 			return std::pair<bool, string>(false, "-1\n");
 		//用户已登录
 		std::pair<bool, user> x = bpt_users.find(uh);
@@ -147,7 +152,7 @@ public:
 	{
 		sjtu::my_str<20> u = username;
 		int uh = u.toint();
-		if (log_in.find(uh) == log_in.end())
+		if (!is_log_in(uh))
 			return std::pair<bool, string>(false, "-1\n");
 		log_in.erase(log_in.find(uh));
 		return std::pair<bool, string>(true, "0\n");
@@ -157,7 +162,7 @@ public:
 	{
 		sjtu::my_str<20> cu = cur_username, u = username;
 		int ch = cu.toint(), uh = u.toint();
-		if (log_in.find(ch) == log_in.end())
+		if (!is_log_in(ch))
 			return std::pair<bool, string>(false, "-1\n");
 		//原用户未登录
 		std::pair<bool, user> xc = bpt_users.find(ch), xu = bpt_users.find(uh);
@@ -179,7 +184,7 @@ public:
 	{
 		sjtu::my_str<20> cu = cur_username, u = username;
 		int ch = cu.toint(), uh = u.toint();
-		if (log_in.find(ch) == log_in.end())
+		if (!is_log_in(ch))
 			return std::pair<bool, string>(false, "-1\n");
 		//原用户未登录
 		std::pair<bool, user> xc = bpt_users.find(ch), xu = bpt_users.find(uh);
@@ -204,4 +209,4 @@ public:
 												 " " + xu.second.get_mailaddr() +
 												 " " + to_String(xu.second.get_privilege()) + "\n");
 	}
-};
+} userManagement;
