@@ -1,6 +1,7 @@
 #ifndef BPTREE_HPP_BPTREE2_HPP
 #define BPTREE_HPP_BPTREE2_HPP
 #include <fstream>
+#include "vector.hpp"
 template<class Key, class T, int M = 500, int L = 500>
 class BPTree {
 private:
