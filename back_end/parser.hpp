@@ -311,6 +311,7 @@ string parse_command(const string &command_line) {
          remove("train_information_database");*/
         exit(0);
     }
+    return "please do not ce";
 }
 
 #endif

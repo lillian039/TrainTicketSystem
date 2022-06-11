@@ -119,13 +119,14 @@ struct train {
 };
 
 struct ticket {
-    int a[100];
+    int a[100], num;
 
     ticket() {}
 
     ticket(const int &station_num, const int &seat_num) {
+        num = seat_num;
         for (int i = 0; i < station_num - 1; i++)
-            a[i] = seat_num;
+            a[i] = num;
     }
 
     void upd(int l, int r, int v) {
@@ -400,7 +401,9 @@ public:
                 if (u == etr[ei].first) continue;
                 std::pair<int, int> y = eti[ei];
                 train v = etr[ei].first;
-                for (int i = 0; i < etr[ei].second; i++) {
+                int day_ = -1;
+                ticket tk;
+                for (int i = etr[ei].second - 1; i >= 0; i--) {
                     if (mp.find(v.stations[i].hashe) == mp.end()) continue;
                     std::pair<int, int> z = mp[v.stations[i].hashe];
                     //中间站在前一个车次的第几站，位置个数
@@ -414,7 +417,13 @@ public:
                     if (depart_time.to_min() < v.get_station_depart_time(i).to_min())
                         depart_time = v.get_station_depart_time(i);
                     int _day = (depart_time & v.get_station_depart_time(i));
-                    _seat_num = train_ticket.find(y.second, _day).qry(i, etr[ei].second - 1);
+                    if (_day != day_) {
+                        tk = train_ticket.find(y.second, _day);
+                        _seat_num = tk.a[i];
+                        for (int j = i + 1; j < etr[ei].second; j++) _seat_num = min(_seat_num, tk.a[j]);
+                        day_ = _day;
+                    }
+                    _seat_num = min(tk.a[i], _seat_num);
                     int price1 = u.stations[z.first].price - u.stations[st[si].second].price;
                     int price2 = v.stations[etr[ei].second].price - v.stations[i].price;
                     int _time = (v.get_station_arrive_time(etr[ei].second) ^ _day) -
