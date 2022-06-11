@@ -3,10 +3,11 @@ project(TrainTicketSystem2022)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS " -Ofast")
+
 include_directories(back_end)
 include_directories(sjtu_hpp_library)
 
-add_executable(TrainTicketSystem2022
+add_executable(code
         back_end/bptree.hpp
         back_end/bufferList.hpp
         back_end/database.hpp
