@@ -2,52 +2,55 @@
 #define STRING_HPP
 
 #include <iostream>
+
 using std::string;
 
-namespace sjtu
-{
+namespace sjtu {
 
-	template <int len = 10>
-	class my_str
-	{
-	private:
-		char s[len];
-		const int prime = 793999;
-		const int mod = 1e9 + 7;
+    template<int len = 10>
+    class my_str {
+    private:
+        char s[len];
+        int n;
+        const int prime = 793999;
+        const int mod = 1e9 + 7;
 
-	public:
-		my_str()
-		{
-			for (int i = 0; i < len; i++)
-				s[i] = 0;
-		}
+    public:
+        my_str() {
+            for (int i = 0; i < len; i++)
+                s[i] = 0;
+            n = len;
+        }
 
-		my_str(const string &str)
-		{
-			int u = str.length();
-			for (int i = 0; i < u; i++)
-				s[i] = str[i];
-			for (int i = u; i < len; i++)
-				s[i] = 0;
-		}
-		//进来的时候保证str的长度<=len
+        my_str(const string &str) {
+            n = str.length();
+            for (int i = 0; i < n; i++)
+                s[i] = str[i];
+        }
+        //进来的时候保证str的长度<=len
 
-		string tostr() const
-		{
-			string u = "";
-			for (int i = 0; i < len && s[i]; i++)
-				u += s[i];
-			return u;
-		}
+        string tostr() const {
+            string u = "";
+            for (int i = 0; i < n; i++)
+                u += s[i];
+            return u;
+        }
 
-		int toint() const
-		{
-			int u = 0;
-			for (int i = len - 1; i >= 0; i--)
-				u = (1ll * prime * u + s[i]) % mod;
-			return u;
-		}
-	};
+        my_str &operator=(const my_str &A) {
+            if (this == &A)
+                return *this;
+            n = A.n;
+            for (int i = 0; i < n; i++) s[i] = A.s[i];
+            return *this;
+        }
+
+        int toint() const {
+            int u = 0;
+            for (int i = 0; i < n; i++)
+                u = (1ll * prime * u + s[i]) % mod;
+            return (u + mod) % mod;
+        }
+    };
 
 }
 
