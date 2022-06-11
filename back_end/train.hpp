@@ -156,36 +156,22 @@ private:
     //找到对应的车票信息
 
     void sort(
-            int l, int r, sjtu::vector<int> &id, const sjtu::vector<string> trainid,
-            const sjtu::vector<std::pair<date, date>> &time,
-            const sjtu::vector<int> &price, const bool &compare) {
+            int l, int r, sjtu::vector<int> &id,
+            const sjtu::vector<string> trainid,
+            const sjtu::vector<int> &judge) {
         if (l == r) return;
         int mid = ((l + r) >> 1);
-        sort(l, mid, id, trainid, time, price, compare);
-        sort(mid + 1, r, id, trainid, time, price, compare);
+        sort(l, mid, id, trainid, judge);
+        sort(mid + 1, r, id, trainid, judge);
         int *arr = new int[r - l + 1];
         for (int i = l, j = mid + 1, k = l; k <= r; k++) {
-            if (compare == 0) {
-                if (j > r || (i <= mid &&
-                              time[id[i]].second - time[id[i]].first <
-                              time[id[j]].second - time[id[j]].first ||
-                              (time[id[i]].second - time[id[i]].first ==
-                               time[id[j]].second - time[id[j]].first &&
-                               trainid[id[i]] < trainid[id[j]])))
-                    arr[k - l] = id[i++];
-                else
-                    arr[k - l] = id[j++];
-            } else {
-                if (j > r || (i <= mid && (price[id[i]] < price[id[j]] ||
-                                           (price[id[i]] == price[id[j]] &&
-                                            trainid[id[i]] < trainid[id[j]]))))
-                    arr[k - l] = id[i++];
-                else
-                    arr[k - l] = id[j++];
-            }
+            if (j > r || (i <= mid && (judge[id[i]] < judge[id[j]] ||
+                                       (judge[id[i]] == judge[id[j]] &&
+                                        trainid[id[i]] < trainid[id[j]]))))
+                arr[k - l] = id[i++];
+            else arr[k - l] = id[j++];
         }
-        for (int i = l; i <= r; i++)
-            id[i] = arr[i - l];
+        for (int i = l; i <= r; i++) id[i] = arr[i - l];
         delete[] arr;
     }
 
@@ -242,10 +228,6 @@ public:
         for (int i = 0; i < station_num; i++)
             bpt_station_train.insert(std::pair<int, std::pair<int, int>>(u.stations[i].hashe,
                                                                          std::pair<int, int>(u.hashe, i)));
-//        if (dfn == 3417) {
-//            for (int i = 0; i < station_num; i++)
-//                std::cerr << u.stations[i].arrive_time << " " << u.stations[i].depart_time << std::endl;
-//        }
         return "0\n";
     }
 
@@ -330,7 +312,7 @@ public:
         sjtu::vector<std::pair<int, int>> et = bpt_station_train.Find(eh);
         sjtu::vector<string> trainid;
         sjtu::vector<std::pair<date, date>> time;
-        sjtu::vector<int> price, seat_num, id;
+        sjtu::vector<int> price, dtime, seat_num, id;
         int sz = st.size(), ez = et.size(), z = 0;
         for (int si = 0, ei = 0; si < sz && ei < ez;) {
             if (st[si].first < et[ei].first)
@@ -350,18 +332,27 @@ public:
                         time.push_back(std::pair<date, date>(
                                 u.get_station_depart_time(st[si].second) ^ day,
                                 u.get_station_arrive_time(et[ei].second) ^ day));
+                        dtime.push_back(
+                                u.get_station_arrive_time(et[ei].second) - u.get_station_depart_time(st[si].second));
                         trainid.push_back(u.trainid.tostr());
-//                        if (dfn == 6945)
+//                        if (dfn == 2316882) {
 //                            std::cerr << u.trainid.tostr() << std::endl;
+//                        }
                     }
                 }
                 si++, ei++;
             }
         }
-        if (z) sort(0, z - 1, id, trainid, time, price, compare);
+//        if (dfn == 2316882) {
+//            for (int i = 0; i < z; i++) std::cerr << id[i] << std::endl;
+//        }
+        if (z) sort(0, z - 1, id, trainid, compare ? price : dtime);
         string ans = std::to_string(z) + "\n";
         for (int i = 0, u; i < z; i++) {
             u = id[i];
+//            if (dfn == 2316882) {
+//                std::cerr << u << std::endl;
+//            }
             ans += trainid[u] + " " + start_station + " " + time[u].first.tostr() + " -> " +
                    end_station + " " + time[u].second.tostr() + " " +
                    std::to_string(price[u]) + " " + std::to_string(seat_num[u]) + "\n";
@@ -428,15 +419,6 @@ public:
                     int price2 = v.stations[etr[ei].second].price - v.stations[i].price;
                     int _time = (v.get_station_arrive_time(etr[ei].second) ^ _day) -
                                 (u.get_station_depart_time(st[si].second) ^ day);
-//                    if (dfn == 359652) {
-//                        std::cerr << price1 << " " << price2 << " " << z.second << " " << _seat_num << " " <<
-//                                  (u.get_station_depart_time(st[si].second) ^ day).tostr() << " " <<
-//                                  (u.get_station_arrive_time(z.first) ^ day).tostr() << " " <<
-//                                  (v.get_station_depart_time(i) ^ _day).tostr() << " " <<
-//                                  (v.get_station_arrive_time(etr[ei].second) ^ _day).tostr() << " " <<
-//                                  u.trainid.tostr() << " " << v.trainid.tostr() <<
-//                                  v.stations[i].name.tostr() << std::endl;
-//                    }
                     if (fl) {
                         if (!compare) {
                             if ((time[1].second - time[0].first) < _time) continue;
