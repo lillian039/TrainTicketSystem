@@ -82,28 +82,20 @@ public:
             const string &cur_username, const string &username,
             const string &password, const string &realname,
             const string &mailaddr, int privilege) {
-//        std::cerr << bpt_users.size() << std::endl;
-        if (!bpt_users.size())
-            privilege = 10;
-            //还没有任何用户注册
+        if (!bpt_users.size()) privilege = 10; //还没有任何用户注册
         else {
             sjtu::my_str<20> cu = cur_username;
             int ch = cu.toint();
-            std::pair<bool, user> x = bpt_users.find(ch);
-            if (!x.first)
-                return "-1\n";
-            //没有原用户
-            if (!is_log_in(ch))
-                return "-1\n";
-            //原用户未登录
-            if (x.second.privilege <= privilege)
-                return "-1\n";
-            //权限限制
+//            if (dfn==3942866) std::cerr<<"1"<<std::endl;
+            if (!is_log_in(ch)) return "-1\n"; //原用户未登录
+            user x = bpt_users.find(ch).second;
+//            if (dfn==3942866) std::cerr<<"2"<<std::endl;
+            if (x.privilege <= privilege) return "-1\n"; //权限限制
             sjtu::my_str<20> u = username;
-            if (bpt_users.find(u.toint()).first)
-                return "-1\n";
-            //新用户已经注册
+//            if (dfn==3942866) std::cerr<<"3"<<std::endl;
+            if (bpt_users.find(u.toint()).first) return "-1\n"; //新用户已经注册
         }
+//        if (dfn==3942866) std::cerr<<"4"<<std::endl;
         user new_user(username, password, realname, mailaddr, privilege);
         bpt_users.insert(std::pair<int, user>(new_user.hash_username, new_user));
         return "0\n";

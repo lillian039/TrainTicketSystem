@@ -12,7 +12,7 @@ namespace sjtu {
     private:
         char s[len];
         int n;
-        const int prime = 793999;
+        const int prime = 19260817;
         const int mod = 1e9 + 7;
 
     public:

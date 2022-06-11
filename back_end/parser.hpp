@@ -183,7 +183,7 @@ string parse_command(const string &command_line) {
                trainManagement.add_train(trainid, station_num,
                                          seat_num, station_name, prices,
                                          start_time, travel_time, stopover_time,
-                                         start_sale, end_sale, type, toint(words[0]));
+                                         start_sale, end_sale, type);
     }
     if (words[1] == "delete_train") {
         string trainid = "";
@@ -208,7 +208,7 @@ string parse_command(const string &command_line) {
             else if (words[i] == "-d")
                 depart = today(words[i + 1]);
         }
-        return words[0] + " " + trainManagement.query_train(trainid, depart, toint(words[0]));
+        return words[0] + " " + trainManagement.query_train(trainid, depart);
     }
     if (words[1] == "query_ticket") {
         string start_station = "", end_station = "", compare = "time";
@@ -224,7 +224,7 @@ string parse_command(const string &command_line) {
                 compare = words[i + 1];
         }
         return words[0] + " " +
-               trainManagement.query_ticket(start_station, end_station, depart, compare == "cost", toint(words[0]));
+               trainManagement.query_ticket(start_station, end_station, depart, compare == "cost");
     }
     if (words[1] == "query_transfer") {
         string start_station = "", end_station = "", compare = "time";
@@ -240,7 +240,7 @@ string parse_command(const string &command_line) {
                 compare = words[i + 1];
         }
         return words[0] + " " +
-               trainManagement.query_transfer(start_station, end_station, depart, compare == "cost", toint(words[0]));
+               trainManagement.query_transfer(start_station, end_station, depart, compare == "cost");
     }
     if (words[1] == "buy_ticket") {
 //        std::cerr << toint(words[0]) << std::endl;
@@ -311,7 +311,7 @@ string parse_command(const string &command_line) {
          remove("train_information_database");*/
         exit(0);
     }
-    return "please do not ce";
+    return "fxxk";
 }
 
 #endif

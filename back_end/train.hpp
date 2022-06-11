@@ -210,7 +210,7 @@ public:
             const int &seat_num, const sjtu::vector<string> &station_name,
             const sjtu::vector<int> &prices, const date &start_time,
             const sjtu::vector<int> &travel_time, const sjtu::vector<int> &stopover_time,
-            const date &start_sale, const date &end_sale, const string &type, int dfn) {
+            const date &start_sale, const date &end_sale, const string &type) {
         sjtu::my_str<20> ti = trainid;
         int th = ti.toint();
         std::pair<bool, std::pair<int, int>> x = bpt_train_information.find(th);
@@ -267,7 +267,7 @@ public:
     }
 
     //发布前的车次，不可发售车票，无法被query_ticket和query_transfer操作所查询到
-    string query_train(const string &trainid, const date &depart, int dfn) {
+    string query_train(const string &trainid, const date &depart) {
         sjtu::my_str<20> ti = trainid;
         int th = ti.toint();
         std::pair<bool, std::pair<int, int>> x = bpt_train_information.find(th);
@@ -305,7 +305,7 @@ public:
 
     string query_ticket(
             const string &start_station, const string &end_station,
-            const date &depart, const bool &compare, int dfn) // compare=0按照time排序，compare=1按照cost排序
+            const date &depart, const bool &compare) // compare=0按照time排序，compare=1按照cost排序
     {
         sjtu::my_str<40> sn(start_station), en(end_station);
         int sh = sn.toint(), eh = en.toint();
@@ -364,7 +364,7 @@ public:
 
     string query_transfer(
             const string &start_station, const string &end_station,
-            const date &depart, const bool &compare, int dfn) {
+            const date &depart, const bool &compare) {
         sjtu::my_str<40> sn(start_station), en(end_station);
         int sh = sn.toint(), eh = en.toint();
         sjtu::vector<std::pair<int, int>> st = bpt_station_train.Find(sh);
