@@ -110,6 +110,7 @@ public:
         date depart = tr.get_station_depart_time(sth) ^ day;
         date arrive = tr.get_station_arrive_time(eth) ^ day;
         ticket tk = trainManagement.find_ticket(x.second.second, day);
+        if (tk.num < ticket_num) return "-1\n";
         int price = tr.stations[eth].price - tr.stations[sth].price;
         if (tk.qry(sth, eth - 1) >= ticket_num) {
             order o(username, trainid, start, end, price, 0, ticket_num,
