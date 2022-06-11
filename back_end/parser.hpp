@@ -88,7 +88,7 @@ string parse_command(const string &command_line) {
         }
         return words[0] + " " +
                userManagement.add_user(cur_username, username,
-                                       password, realname, mailaddr, privilege);
+                                       password, realname, mailaddr, privilege, toint(words[0]));
     }
     if (words[1] == "login") {
         string username = "", password = "";
@@ -137,7 +137,7 @@ string parse_command(const string &command_line) {
         }
         return words[0] + " " +
                userManagement.modify_profile(cur_username, username,
-                                             password, realname, mailaddr, privilege);
+                                             password, realname, mailaddr, privilege, toint(words[0]));
     }
     if (words[1] == "add_train") {
         string trainid = "", type = "";
@@ -183,21 +183,21 @@ string parse_command(const string &command_line) {
                trainManagement.add_train(trainid, station_num,
                                          seat_num, station_name, prices,
                                          start_time, travel_time, stopover_time,
-                                         start_sale, end_sale, type);
+                                         start_sale, end_sale, type, toint(words[0]));
     }
     if (words[1] == "delete_train") {
         string trainid = "";
         for (int i = 2; i < z; i += 2)
             if (words[i] == "-i")
                 trainid = words[i + 1];
-        return words[0] + " " + trainManagement.delete_train(trainid);
+        return words[0] + " " + trainManagement.delete_train(trainid, toint(words[0]));
     }
     if (words[1] == "release_train") {
         string trainid = "";
         for (int i = 2; i < z; i += 2)
             if (words[i] == "-i")
                 trainid = words[i + 1];
-        return words[0] + " " + trainManagement.release_train(trainid);
+        return words[0] + " " + trainManagement.release_train(trainid, toint(words[0]));
     }
     if (words[1] == "query_train") {
         string trainid = "";
@@ -224,7 +224,7 @@ string parse_command(const string &command_line) {
                 compare = words[i + 1];
         }
         return words[0] + " " +
-               trainManagement.query_ticket(start_station, end_station, depart, compare == "cost");
+               trainManagement.query_ticket(start_station, end_station, depart, compare == "cost", toint(words[0]));
     }
     if (words[1] == "query_transfer") {
         string start_station = "", end_station = "", compare = "time";
@@ -285,9 +285,15 @@ string parse_command(const string &command_line) {
             else if (words[i] == "-n")
                 num = toint(words[i + 1]);
         }
-        return words[0] + " " + orderManagement.refund_ticket(username, num);
+        return words[0] + " " + orderManagement.refund_ticket(username, num, toint(words[0]));
     }
     if (words[1] == "rollback") {
+        int now = toint(words[0]), pre = toint(words[3]);
+        if (now < pre) return "-1\n";
+        userManagement.rollback(pre);
+        trainManagement.rollback(pre);
+        orderManagement.rollback(pre);
+        return words[0] + " 0\n";
     }
     if (words[1] == "clean") {
         userManagement.clean();

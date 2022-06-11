@@ -86,14 +86,16 @@ public:
             file_leaf.seekg(tmp.pos * sizeof(Leaf) + len_of_head_leaf);
             file_leaf.write(reinterpret_cast<char *>(&tmp), sizeof(Leaf));
         }
-        file_tree.seekg(len_of_head_tree+(rear_tree+1)* sizeof(Node));
-        int size_tree=empty_tree.size(),size_leaf=empty_leaf.size();
-      //  std::cout<<size_tree<<" "<<size_leaf<<std::endl;
+        file_tree.seekg(len_of_head_tree + (rear_tree + 1) * sizeof(Node));
+        int size_tree = empty_tree.size(), size_leaf = empty_leaf.size();
+        //  std::cout<<size_tree<<" "<<size_leaf<<std::endl;
         file_tree.write(reinterpret_cast<char *>(&size_tree), sizeof(int));
-        for(int i=0;i<empty_tree.size();i++)file_tree.write(reinterpret_cast<char *>(&empty_tree[i]), sizeof(int));
-        file_leaf.seekg(len_of_head_leaf+(rear_leaf+1)* sizeof(Leaf));
+        for (int i = 0; i < empty_tree.size(); i++)
+            file_tree.write(reinterpret_cast<char *>(&empty_tree[i]), sizeof(int));
+        file_leaf.seekg(len_of_head_leaf + (rear_leaf + 1) * sizeof(Leaf));
         file_leaf.write(reinterpret_cast<char *>(&size_leaf), sizeof(int));
-        for(int i=0;i<empty_leaf.size();i++)file_leaf.write(reinterpret_cast<char *>(&empty_leaf[i]), sizeof(int));
+        for (int i = 0; i < empty_leaf.size(); i++)
+            file_leaf.write(reinterpret_cast<char *>(&empty_leaf[i]), sizeof(int));
         file_leaf.close();
         file_tree.close();
     }
@@ -133,15 +135,15 @@ public:
         return ans;
     }
 
-    std::pair<bool,T> find(const Key &key){
+    std::pair<bool, T> find(const Key &key) {
         T val;
         Node p = root;
         while (!p.is_leaf)read_node(p, p.A[binary_search_node(key, p)]);//A[now]中元素小于等于Key[now] 循环找到叶节点
         read_leaf(leaf, p.A[binary_search_node(key, p)]);//找到叶子节点
         int now = binary_search_leaf(key, leaf);
-        bool flag=true;
-        if(now==leaf.n||leaf.value[now].first!=key)flag= false;
-        return std::make_pair(flag,leaf.value[now].second);
+        bool flag = true;
+        if (now == leaf.n || leaf.value[now].first != key)flag = false;
+        return std::make_pair(flag, leaf.value[now].second);
     }
 
     void remove(const std::pair<Key, T> &val) {
@@ -169,6 +171,21 @@ public:
         empty_tree.clear();
         empty_leaf.clear();
         initialize();
+    }
+
+    //用于回顾 返回key之后的所有数据
+    sjtu::vector<std::pair<Key,T>> roll(const Key &key) {
+        sjtu::vector<std::pair<Key,T>> ans;
+        Node p = root;
+        while (!p.is_leaf)read_node(p, p.A[binary_search_node(key, p)]);//A[now]中元素小于等于Key[now] 循环找到叶节点
+        read_leaf(leaf, p.A[binary_search_node(key, p)]);//找到叶子节点
+        int now = binary_search_leaf(key, leaf);
+        while (now < leaf.n)ans.push_back(leaf.value[now++]);
+        while (leaf.nxt) {//读到文件尾 寻找下一块
+            read_leaf(leaf, leaf.nxt);
+            for(int i=0;i<leaf.n;i++)ans.push_back(leaf.value[i]);
+        }
+        return ans;
     }
 
 private:
