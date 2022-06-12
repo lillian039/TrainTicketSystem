@@ -12,3 +12,6 @@
 后端开发文档：[火车票后端开发文档](https://github.com/lillian039/TrainTicketSystem2022/blob/main/back_end/火车票开发文档.md)
 
 前端开发文档：[前端部分开发文档](https://github.com/lillian039/TrainTicketSystem2022/blob/main/front_end/前端部分开发文档.md)
+
+6.12日已通过所有正确性！！ :train2: :sunglasses:
+
