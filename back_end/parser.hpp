@@ -64,10 +64,6 @@ date tomin(const string &u) {
 
 string parse_command(const string &command_line) {
     sjtu::vector<string> words = parser(command_line);
-//    if (toint(words[0]) == 7197) {
-//        std::cout << "!";
-//    }
-//    if (toint(words[0]) >= 13261) std::cerr << command_line << std::endl;
     int z = words.size();
     if (words[1] == "add_user") {
         string cur_username = "", username = "", password = "", realname = "", mailaddr = "";
@@ -224,7 +220,7 @@ string parse_command(const string &command_line) {
                 compare = words[i + 1];
         }
         return words[0] + " " +
-               trainManagement.query_ticket(start_station, end_station, depart, compare == "cost", toint(words[0]));
+               trainManagement.query_ticket(start_station, end_station, depart, compare == "cost");
     }
     if (words[1] == "query_transfer") {
         string start_station = "", end_station = "", compare = "time";
@@ -243,12 +239,10 @@ string parse_command(const string &command_line) {
                trainManagement.query_transfer(start_station, end_station, depart, compare == "cost");
     }
     if (words[1] == "buy_ticket") {
-//        std::cerr << toint(words[0]) << std::endl;
         string username = "", trainid = "", start = "", end = "", will = "false";
         date start_date;
         int ticket_num = 0;
         for (int i = 2; i < z; i += 2) {
-//            std::cerr << i << std::endl;
             if (words[i] == "-u")
                 username = words[i + 1];
             else if (words[i] == "-i")
@@ -264,7 +258,6 @@ string parse_command(const string &command_line) {
             else if (words[i] == "-q")
                 will = words[i + 1];
         }
-//        std::cerr << "enter" << std::endl;
         return words[0] + " " +
                orderManagement.buy_ticket(username, trainid, start_date, ticket_num,
                                           start, end, will == "true", toint(words[0]));
@@ -303,18 +296,6 @@ string parse_command(const string &command_line) {
     }
     if (words[1] == "exit") {
         std::cout << words[0] << " bye\n";
-        /* remove("bpt_users_file_tree");
-         remove("bpt_users_file_leaf");
-         remove("bpt_station_train_file_leaf");
-         remove("bpt_station_train_file_tree");
-         remove("bpt_train_information_file_leaf");
-         remove("bpt_train_information_file_tree");
-         remove("btp_train_order_file_leaf");
-         remove("btp_train_order_file_tree");
-         remove("btp_user_order_file_leaf");
-         remove("btp_user_order_file_tree");
-         remove("train_ticket_database");
-         remove("train_information_database");*/
         exit(0);
     }
     return "fxxk";

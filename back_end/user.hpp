@@ -5,7 +5,7 @@
 
 #include "string.hpp"
 #include "linked_hashmap.hpp"
-#include "bptree.hpp"
+#include "bptree_roll.hpp"
 #include "vector.hpp"
 
 using std::string;
@@ -55,11 +55,41 @@ struct user {
     }
 };
 
+struct user_roll {
+    int type;
+    user pre, now;
+
+    friend bool operator<(const user_roll &lhs, const user_roll &rhs) {
+        return lhs.type < rhs.type;
+    }
+
+    friend bool operator>(const user_roll &lhs, const user_roll &rhs) {
+        return lhs.type > rhs.type;
+    }
+
+    friend bool operator==(const user_roll &lhs, const user_roll &rhs) {
+        return lhs.type == rhs.type;
+    }
+
+    friend bool operator!=(const user_roll &lhs, const user_roll &rhs) {
+        return lhs.type != rhs.type;
+    }
+
+    friend bool operator<=(const user_roll &lhs, const user_roll &rhs) {
+        return lhs.type <= rhs.type;
+    }
+
+    friend bool operator>=(const user_roll &lhs, const user_roll &rhs) {
+        return lhs.type >= rhs.type;
+    }
+};
+
 class user_management {
 private:
     BPTree<int, user> bpt_users;
     //哈希值对应用户
-    BPTree<int, std::pair<int, std::pair<user, user>>> bpt_roll;
+
+    BPTree<int, user_roll> bpt_roll;
     //操作类型，前后user
 
     sjtu::linked_hashmap<int, bool> log_in;
@@ -94,8 +124,7 @@ public:
         }
         user new_user(username, password, realname, mailaddr, privilege);
         bpt_users.insert(std::pair<int, user>(new_user.hash_username, new_user));
-        bpt_roll.insert(std::pair<int, std::pair<int, std::pair<user, user>>>(
-                dfn, std::pair<int, std::pair<user, user>>(0, std::pair<user, user>(new_user, new_user))));
+        bpt_roll.insert(std::pair<int, user_roll>(dfn, (user_roll) {0, new_user, new_user}));
         return "0\n";
     }
 
@@ -149,20 +178,19 @@ public:
         if (mailaddr != "") nu.mailaddr = (sjtu::my_str<30>) mailaddr;
         if (privilege >= 0) nu.privilege = privilege;
         bpt_users.modify(std::pair<int, user>(uh, xu.second), nu);
-        bpt_roll.insert(std::pair<int, std::pair<int, std::pair<user, user>>>(
-                dfn, std::pair<int, std::pair<user, user>>(1, std::pair<user, user>(xu.second, nu))));
+        bpt_roll.insert(std::pair<int, user_roll>(dfn, (user_roll) {1, xu.second, nu}));
         return username + " " + nu.realname.tostr() +
                " " + nu.mailaddr.tostr() + " " + std::to_string(nu.privilege) + "\n";
     }
 
     void rollback(const int &pre) {
-        sjtu::vector<std::pair<int, std::pair<int, std::pair<user, user>>>> v = bpt_roll.roll(pre);
-        int z = v.size();
-        for (int i = z - 1; i >= 0; i--) {
-            std::pair<int, std::pair<user, user>> u = v[i].second;
-            if (u.first == 0) bpt_users.remove(std::pair<int, user>(u.second.first.hash_username, u.second.first));
-            else bpt_users.modify(std::pair<int, user>(u.second.first.hash_username, u.second.second), u.second.first);
-            bpt_roll.remove(v[i]);
+        while (bpt_roll.size()) {
+            std::pair<int, user_roll> v = bpt_roll.find_max();
+            if (v.first < pre) break;
+            user_roll u = v.second;
+            if (u.type == 0) bpt_users.remove(std::pair<int, user>(u.pre.hash_username, u.pre));
+            else bpt_users.modify(std::pair<int, user>(u.pre.hash_username, u.now), u.pre);
+            bpt_roll.remove(v);
         }
         log_in.clear();
     }

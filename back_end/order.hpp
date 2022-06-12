@@ -7,7 +7,7 @@
 #include "date.hpp"
 #include "user.hpp"
 #include "train.hpp"
-#include "bptree.hpp"
+#include "bptree_roll.hpp"
 
 using std::string;
 
@@ -68,8 +68,39 @@ struct order {
     }
 };
 
+struct ticket_roll {
+    int idxpre, idx, day;
+    //把改之前的ticket重新记录在database里的某个位置
+    //idx，day 车票的idx和day
+
+    friend bool operator<(const ticket_roll &lhs, const ticket_roll &rhs) {
+        return lhs.idxpre < rhs.idxpre;
+    }
+
+    friend bool operator>(const ticket_roll &lhs, const ticket_roll &rhs) {
+        return lhs.idxpre > rhs.idxpre;
+    }
+
+    friend bool operator==(const ticket_roll &lhs, const ticket_roll &rhs) {
+        return lhs.idxpre == rhs.idxpre;
+    }
+
+    friend bool operator>=(const ticket_roll &lhs, const ticket_roll &rhs) {
+        return lhs.idxpre >= rhs.idxpre;
+    }
+
+    friend bool operator<=(const ticket_roll &lhs, const ticket_roll &rhs) {
+        return lhs.idxpre <= rhs.idxpre;
+    }
+
+    friend bool operator!=(const ticket_roll &lhs, const ticket_roll &rhs) {
+        return lhs.idxpre != rhs.idxpre;
+    }
+};
+
 struct user_order_roll {
     int type, hashe;
+    //0:insert 1 modify
     order pre, now;
 
     friend bool operator<(const user_order_roll &lhs, const user_order_roll &rhs) {
@@ -97,9 +128,9 @@ struct user_order_roll {
     }
 };
 
-
 struct train_order_roll {
     int type, hashe, day;
+    //0:insert 1:remove
     order o;
 
     friend bool operator<(const train_order_roll &lhs, const train_order_roll &rhs) {
@@ -135,7 +166,7 @@ private:
     BPTree<std::pair<int, int>, order> bpt_train_order;
     // trainid的哈希值查询车次的候补队列
 
-    BPTree<int, std::pair<int, std::pair<int, int>>> bpt_ticket_roll;
+    BPTree<int, ticket_roll> bpt_ticket_roll;
     //改之前的idx，车票的idx和day
 
     BPTree<int, user_order_roll> bpt_user_order_roll;
@@ -187,26 +218,20 @@ public:
             order o(username, trainid, start, end, price, 0, ticket_num,
                     depart, arrive, dfn, day, x.second.second, sth, eth);
             bpt_user_order.insert(std::pair<int, order>(uh, o));
-            int ri = trainManagement.insert_ticket_roll(tk);
+            bpt_user_order_roll.insert(std::pair<int, user_order_roll>(dfn, (user_order_roll) {0, uh, o, o}));
+            int ri = trainManagement.insert_ticket(tk);
+            bpt_ticket_roll.insert(std::pair<int, ticket_roll>(dfn, (ticket_roll) {ri, x.second.second, day}));
             tk.upd(sth, eth - 1, -ticket_num);
             trainManagement.modify(x.second.second, tk, day);
-            bpt_ticket_roll.insert(std::pair<int, std::pair<int, std::pair<int, int>>>(
-                    dfn, std::pair<int, std::pair<int, int>>(
-                            ri, std::pair<int, int>(x.second.second, day))));
-            bpt_user_order_roll.insert(
-                    std::pair<int, user_order_roll>(dfn, (user_order_roll) {0, uh, o, o}));
             return std::to_string(1ll * ticket_num * price) + "\n";
-        }//满足
-        else {
+        } else {
             if (will) {
                 order o(username, trainid, start, end, price, 1, ticket_num,
                         depart, arrive, dfn, day, x.second.second, sth, eth);
                 bpt_user_order.insert(std::pair<int, order>(uh, o));
+                bpt_user_order_roll.insert(std::pair<int, user_order_roll>(dfn, (user_order_roll) {0, uh, o, o}));
                 bpt_train_order.insert(std::pair<std::pair<int, int>, order>(std::pair<int, int>(th, day), o));
-                bpt_user_order_roll.insert(
-                        std::pair<int, user_order_roll>(dfn, (user_order_roll) {0, uh, o, o}));
-                bpt_train_order_roll.insert(
-                        std::pair<int, train_order_roll>(dfn, (train_order_roll) {0, uh, day, o}));
+                bpt_train_order_roll.insert(std::pair<int, train_order_roll>(dfn, (train_order_roll) {0, th, day, o}));
                 return "queue\n";
             } else return "-1\n"; //票太少了 不愿意加入候补队列
         }
@@ -243,34 +268,30 @@ public:
         bool is_change = (u[z - num].status == 0);
         x.status = 2;
         bpt_user_order.modify(std::pair<int, order>(uh, u[z - num]), x);
-        bpt_user_order_roll.insert(
-                std::pair<int, user_order_roll>(dfn, (user_order_roll) {1, uh, u[z - num], x}));
+        bpt_user_order_roll.insert(std::pair<int, user_order_roll>(dfn, (user_order_roll) {1, uh, u[z - num], x}));
         int th = x.trainid.toint(), day = x.day;
         if (!is_change) {
-            bpt_train_order.remove(
-                    std::pair<std::pair<int, int>, order>(std::pair<int, int>(th, day), u[z - num]));
+            bpt_train_order.remove(std::pair<std::pair<int, int>, order>(std::pair<int, int>(th, day), u[z - num]));
             bpt_train_order_roll.insert(
                     std::pair<int, train_order_roll>(dfn, (train_order_roll) {1, th, day, u[z - num]}));
         } else {
             u = bpt_train_order.Find(std::pair<int, int>(th, day));
             z = u.size();
             ticket tk = trainManagement.find_ticket(x.tk_addr, day);
-            int ri = trainManagement.insert_ticket_roll(tk);
-            bpt_ticket_roll.insert(std::pair<int, std::pair<int, std::pair<int, int>>>(
-                    dfn, std::pair<int, std::pair<int, int>>(
-                            ri, std::pair<int, int>(x.tk_addr, day))));
+            int ri = trainManagement.insert_ticket(tk);
+            bpt_ticket_roll.insert(std::pair<int, ticket_roll>(dfn, (ticket_roll) {ri, x.tk_addr, day}));
             tk.upd(x.sth, x.eth - 1, x.ticket_num);
-            for (int i = 0, j = 0; i < z; i++) {
+            for (int i = 0; i < z; i++) {
                 if (tk.qry(u[i].sth, u[i].eth - 1) >= u[i].ticket_num) {
-                    int uh = u[i].username.toint();
+                    uh = u[i].username.toint();
                     tk.upd(u[i].sth, u[i].eth - 1, -u[i].ticket_num);
                     order y = u[i];
                     y.status = 0;
                     bpt_user_order.modify(std::pair<int, order>(uh, u[i]), y);
-                    bpt_train_order.remove(
-                            std::pair<std::pair<int, int>, order>(std::pair<int, int>(th, day), u[i]));
                     bpt_user_order_roll.insert(
                             std::pair<int, user_order_roll>(dfn, (user_order_roll) {1, uh, u[i], y}));
+                    bpt_train_order.remove(
+                            std::pair<std::pair<int, int>, order>(std::pair<int, int>(th, day), u[i]));
                     bpt_train_order_roll.insert(
                             std::pair<int, train_order_roll>(dfn, (train_order_roll) {1, th, day, u[i]}));
                 }
@@ -281,30 +302,30 @@ public:
     }
 
     void rollback(const int &pre) {
-        sjtu::vector<std::pair<int, std::pair<int, std::pair<int, int>>>> x = bpt_ticket_roll.roll(pre);
-        sjtu::vector<std::pair<int, user_order_roll>> y = bpt_user_order_roll.roll(pre);
-        sjtu::vector<std::pair<int, train_order_roll>> z = bpt_train_order_roll.roll(pre);
-        int xz = x.size();
-        for (int i = xz - 1; i >= 0; i--) {
-            std::pair<int, std::pair<int, int>> u = x[i].second;
-            trainManagement.modify(u.second.first, trainManagement.find_ticket_roll(u.first), u.second.second);
-            bpt_ticket_roll.remove(x[i]);
+        while (bpt_ticket_roll.size()) {
+            std::pair<int, ticket_roll> u = bpt_ticket_roll.find_max();
+            if (u.first < pre) break;
+            ticket_roll x = u.second;
+            trainManagement.modify(x.idx, trainManagement.find_ticket(x.idxpre), x.day);
+            bpt_ticket_roll.remove(u);
         }
-        int yz = y.size();
-        for (int i = yz - 1; i >= 0; i--) {
-            user_order_roll u = y[i].second;
-            if (u.type == 0) bpt_user_order.remove(std::pair<int, order>(u.hashe, u.pre));
-            else bpt_user_order.modify(std::pair<int, order>(u.hashe, u.now), u.pre);
-            bpt_user_order_roll.remove(y[i]);
+        while (bpt_user_order_roll.size()) {
+            std::pair<int, user_order_roll> v = bpt_user_order_roll.find_max();
+            if (v.first < pre) break;
+            user_order_roll x = v.second;
+            if (x.type == 0) bpt_user_order.remove(std::pair<int, order>(x.hashe, x.pre));
+            else bpt_user_order.modify(std::pair<int, order>(x.hashe, x.now), x.pre);
+            bpt_user_order_roll.remove(v);
         }
-        int zz = z.size();
-        for (int i = zz - 1; i >= 0; i--) {
-            train_order_roll u = z[i].second;
-            if (u.type == 0)
-                bpt_train_order.remove(std::pair<std::pair<int, int>, order>(std::pair<int, int>(u.hashe, u.day), u.o));
+        while (bpt_train_order_roll.size()) {
+            std::pair<int, train_order_roll> w = bpt_train_order_roll.find_max();
+            if (w.first < pre) break;
+            train_order_roll x = w.second;
+            if (x.type == 0)
+                bpt_train_order.remove(std::pair<std::pair<int, int>, order>(std::pair<int, int>(x.hashe, x.day), x.o));
             else
-                bpt_train_order.insert(std::pair<std::pair<int, int>, order>(std::pair<int, int>(u.hashe, u.day), u.o));
-            bpt_train_order_roll.remove(z[i]);
+                bpt_train_order.insert(std::pair<std::pair<int, int>, order>(std::pair<int, int>(x.hashe, x.day), x.o));
+            bpt_train_order_roll.remove(w);
         }
     }
 

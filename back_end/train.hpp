@@ -5,7 +5,7 @@
 
 #include "string.hpp"
 #include "date.hpp"
-#include "bptree.hpp"
+#include "bptree_roll.hpp"
 #include "database.hpp"
 #include "vector.hpp"
 
@@ -142,6 +142,34 @@ struct ticket {
     }
 };
 
+struct train_roll {
+    int type, tr, tk;
+
+    friend bool operator<(const train_roll &lhs, const train_roll &rhs) {
+        return lhs.type < rhs.type;
+    }
+
+    friend bool operator>(const train_roll &lhs, const train_roll &rhs) {
+        return lhs.type > rhs.type;
+    }
+
+    friend bool operator==(const train_roll &lhs, const train_roll &rhs) {
+        return lhs.type == rhs.type;
+    }
+
+    friend bool operator!=(const train_roll &lhs, const train_roll &rhs) {
+        return lhs.type != rhs.type;
+    }
+
+    friend bool operator<=(const train_roll &lhs, const train_roll &rhs) {
+        return lhs.type <= rhs.type;
+    }
+
+    friend bool operator>=(const train_roll &lhs, const train_roll &rhs) {
+        return lhs.type >= rhs.type;
+    }
+};
+
 class train_management {
 private:
     BPTree<int, std::pair<int, int>> bpt_station_train;
@@ -156,9 +184,7 @@ private:
     Database<ticket> train_ticket;
     //找到对应的车票信息
 
-    Database<ticket> ticket_roll;
-
-    BPTree<int, std::pair<int, std::pair<int, int>>> bpt_train_roll;
+    BPTree<int, train_roll> bpt_train_roll;
     //操作类型，车次的idx，票的idx
 
     void sort(
@@ -186,8 +212,7 @@ public:
                          bpt_train_information("bpt_train_information"),
                          train_information("train_information"),
                          train_ticket("train_ticket"),
-                         bpt_train_roll("bpt_train_roll"),
-                         ticket_roll("ticket_roll") {}
+                         bpt_train_roll("bpt_train_roll") {}
 
     void clean() {
         bpt_station_train.clear();
@@ -204,16 +229,12 @@ public:
         return train_information.find(tr_addr);
     }
 
-    ticket find_ticket(const int &tk_addr, const int &day) {
+    int insert_ticket(const ticket &tk) {
+        return train_ticket.insert(tk);
+    }
+
+    ticket find_ticket(const int &tk_addr, const int &day = 0) {
         return train_ticket.find(tk_addr, day);
-    }
-
-    ticket find_ticket_roll(const int &tk_addr) {
-        return ticket_roll.find(tk_addr);
-    }
-
-    int insert_ticket_roll(ticket tk) {
-        return ticket_roll.insert(tk);
     }
 
     void modify(const int &tk_addr, const ticket &tk, const int &day) {
@@ -240,8 +261,7 @@ public:
         for (int i = 0; i < station_num; i++)
             bpt_station_train.insert(
                     std::pair<int, std::pair<int, int>>(u.stations[i].hashe, std::pair<int, int>(u.hashe, i)));
-        bpt_train_roll.insert(std::pair<int, std::pair<int, std::pair<int, int>>>(
-                dfn, std::pair<int, std::pair<int, int>>(0, std::pair<int, int>(tr, tk))));
+        bpt_train_roll.insert(std::pair<int, train_roll>(dfn, (train_roll) {0, tr, tk}));
         return "0\n";
     }
 
@@ -256,8 +276,7 @@ public:
         for (int i = 0; i < u.station_num; i++)
             bpt_station_train.remove(
                     std::pair<int, std::pair<int, int>>(u.stations[i].hashe, std::pair<int, int>(u.hashe, i)));
-        bpt_train_roll.insert(std::pair<int, std::pair<int, std::pair<int, int>>>(
-                dfn, std::pair<int, std::pair<int, int>>(1, x.second)));
+        bpt_train_roll.insert(std::pair<int, train_roll>(dfn, (train_roll) {1, x.second.first, x.second.second}));
         return "0\n";
     }
 
@@ -270,8 +289,7 @@ public:
         if (u.release) return "-1\n"; //车次已发布
         u.release = 1;
         train_information.modify(u, x.second.first);
-        bpt_train_roll.insert(std::pair<int, std::pair<int, std::pair<int, int>>>(
-                dfn, std::pair<int, std::pair<int, int>>(2, x.second)));
+        bpt_train_roll.insert(std::pair<int, train_roll>(dfn, (train_roll) {2, x.second.first, x.second.second}));
         return "0\n";
     }
 
@@ -303,7 +321,7 @@ public:
 
     string query_ticket(
             const string &start_station, const string &end_station,
-            const date &depart, const bool &compare, int dfn) // compare=0按照time排序，compare=1按照cost排序
+            const date &depart, const bool &compare) // compare=0按照time排序，compare=1按照cost排序
     {
         sjtu::my_str<40> sn(start_station), en(end_station);
         int sh = sn.toint(), eh = en.toint();
@@ -332,7 +350,6 @@ public:
                         dtime.push_back(
                                 u.get_station_arrive_time(et[ei].second) - u.get_station_depart_time(st[si].second));
                         trainid.push_back(u.trainid.tostr());
-//                        if (dfn == 6985) std::cerr << u.trainid.tostr() << std::endl;
                     }
                 }
                 si++, ei++;
@@ -403,13 +420,8 @@ public:
                     if (depart_time.to_min() < v.get_station_depart_time(i).to_min())
                         depart_time = v.get_station_depart_time(i);
                     int _day = (depart_time & v.get_station_depart_time(i));
-                    if (_day != day_) {
-                        tk = train_ticket.find(y.second, _day);
-                        _seat_num = tk.a[i];
-                        for (int j = i + 1; j < etr[ei].second; j++) _seat_num = min(_seat_num, tk.a[j]);
-                        day_ = _day;
-                    }
-                    _seat_num = min(tk.a[i], _seat_num);
+                    if (_day != day_) tk = train_ticket.find(y.second, _day);
+                    _seat_num = tk.qry(i, etr[ei].second - 1);
                     int price1 = u.stations[z.first].price - u.stations[st[si].second].price;
                     int price2 = v.stations[etr[ei].second].price - v.stations[i].price;
                     int _time = (v.get_station_arrive_time(etr[ei].second) ^ _day) -
@@ -457,28 +469,30 @@ public:
     }
 
     void rollback(const int &pre) {
-        sjtu::vector<std::pair<int, std::pair<int, std::pair<int, int>>>> v = bpt_train_roll.roll(pre);
-        int z = v.size();
-        for (int i = z - 1; i >= 0; i--) {
-            std::pair<int, std::pair<int, int>> u = v[i].second;
-            if (u.first == 0) {
-                train x = train_information.find(u.second.first);
+        while(bpt_train_roll.size()){
+            std::pair<int, train_roll> v=bpt_train_roll.find_max();
+            if (v.first<pre) break;
+            train_roll u = v.second;
+            if (u.type == 0) {
+                train x = train_information.find(u.tr);
                 for (int j = 0; j < x.station_num; j++)
                     bpt_station_train.remove(
                             std::pair<int, std::pair<int, int>>(x.stations[j].hashe, std::pair<int, int>(x.hashe, j)));
-                bpt_train_information.remove(std::pair<int, std::pair<int, int>>(x.hashe, u.second));
-            } else if (u.first == 1) {
-                train x = train_information.find(u.second.first);
+                bpt_train_information.remove(
+                        std::pair<int, std::pair<int, int>>(x.hashe, std::pair<int, int>(u.tr, u.tk)));
+            } else if (u.type == 1) {
+                train x = train_information.find(u.tr);
                 for (int j = 0; j < x.station_num; j++)
                     bpt_station_train.insert(
                             std::pair<int, std::pair<int, int>>(x.stations[j].hashe, std::pair<int, int>(x.hashe, j)));
-                bpt_train_information.insert(std::pair<int, std::pair<int, int>>(x.hashe, u.second));
+                bpt_train_information.insert(
+                        std::pair<int, std::pair<int, int>>(x.hashe, std::pair<int, int>(u.tr, u.tk)));
             } else {
-                train x = train_information.find(u.second.first);
+                train x = train_information.find(u.tr);
                 x.release = 0;
-                train_information.modify(x, u.second.first);
+                train_information.modify(x, u.tr);
             }
-            bpt_train_roll.remove(v[i]);
+            bpt_train_roll.remove(v);
         }
     }
 } trainManagement;
