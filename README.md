@@ -11,7 +11,7 @@
 
 整体信息：[ACMClassCourse-2021/TicketSystem: Data Structure 2022 homework](https://github.com/ACMClassCourse-2021/TicketSystem)
 
-后端开发文档：[火车票后端开发文档](https://github.com/lillian039/TrainTicketSystem2022/blob/main/back_end/火车票开发文档.md)
+后端开发文档：[后端部分开发文档](https://github.com/lillian039/TrainTicketSystem2022/blob/main/back_end_normal/火车票开发文档.md)
 
 前端开发文档：[前端部分开发文档](https://github.com/lillian039/TrainTicketSystem2022/blob/main/front_end/前端部分开发文档.md)
 
