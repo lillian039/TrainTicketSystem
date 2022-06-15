@@ -52,7 +52,7 @@ public:
     }
     //用于查找某车次车票某天的售卖情况 idx为某车次的车票所在位置
 
-    int insert(const T &value, int time = 0) {
+    int insert(const T &value) {
         rear++;
         file.seekg(head_of_file + rear * sizeof(T));
         file.write(reinterpret_cast<const char *>(&value), sizeof(T));
