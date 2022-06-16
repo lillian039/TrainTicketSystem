@@ -12,7 +12,8 @@ private:
     T data;
     std::fstream file;
     int rear;//文件头尾所在位置
-    const int head_of_file = sizeof(int);
+    int siz;//文件条数
+    const int head_of_file = 2 * sizeof(int);
     std::string database_name;
 public:
     Database() = default;
@@ -22,12 +23,14 @@ public:
         file.open(database_name);
         if (!file) {
             rear = 0;
+            siz = 0;
             file.open(database_name, std::ios::out);
             file.close();
             file.open(database_name);
         } else {
             file.seekg(0);
             file.read(reinterpret_cast<char *>(&rear), sizeof(int));
+            file.read(reinterpret_cast<char *>(&siz), sizeof(int));
         }
     }
     //初始化 打开文件
@@ -35,6 +38,7 @@ public:
     ~Database() {
         file.seekg(0);
         file.write(reinterpret_cast<char *>(&rear), sizeof(int));
+        file.write(reinterpret_cast<char *>(&siz), sizeof(int));
     }
     //析构 关闭文件
 
@@ -54,9 +58,14 @@ public:
 
     int insert(const T &value) {
         rear++;
+        siz++;
         file.seekg(head_of_file + rear * sizeof(T));
         file.write(reinterpret_cast<const char *>(&value), sizeof(T));
         return rear;
+    }
+
+    int size() {
+        return siz;
     }
 
     void clear() {
@@ -67,6 +76,17 @@ public:
         file.open(database_name);
     }
     //插入新的数据组
+
+    T back() {
+        file.seekg(head_of_file + rear  * sizeof(T));
+        file.read(reinterpret_cast<char *>(&data), sizeof(T));
+        return data;
+    }
+
+    void pop_back() {
+        rear--;
+        siz--;
+    }
 };
 
 

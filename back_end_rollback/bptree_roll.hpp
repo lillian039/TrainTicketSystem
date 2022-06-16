@@ -118,15 +118,6 @@ public:
         return std::make_pair(flag, leaf.value[now].second);
     }
 
-    std::pair<Key,T> find_max(){
-        T val;
-        Node p = root;
-        while (!p.is_leaf)read_node(p, p.A[p.n-1]);//A[now]中最大元素的位置
-        read_leaf(leaf, p.A[p.n-1]);//找到最大叶子节点
-        return leaf.value[leaf.n-1];
-    }
-
-
     void remove(const std::pair<Key, T> &val) {
         if (Remove(val, root)) {
             if (!root.is_leaf && root.n == 1) {//若根只有一个儿子，且根不为叶子，将儿子作为新的根
@@ -150,21 +141,6 @@ public:
         node_buffer.clear();
         leaf_buffer.clear();
         initialize();
-    }
-
-    //用于回顾 返回key之后的所有数据
-    sjtu::vector<std::pair<Key,T>> roll(const Key &key) {
-        sjtu::vector<std::pair<Key,T>> ans;
-        Node p = root;
-        while (!p.is_leaf)read_node(p, p.A[binary_search_node(key, p)]);//A[now]中元素小于等于Key[now] 循环找到叶节点
-        read_leaf(leaf, p.A[binary_search_node(key, p)]);//找到叶子节点
-        int now = binary_search_leaf(key, leaf);
-        while (now < leaf.n)ans.push_back(leaf.value[now++]);
-        while (leaf.nxt) {//读到文件尾 寻找下一块
-            read_leaf(leaf, leaf.nxt);
-            for(int i=0;i<leaf.n;i++)ans.push_back(leaf.value[i]);
-        }
-        return ans;
     }
 
 private:

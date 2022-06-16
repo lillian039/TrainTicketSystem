@@ -144,30 +144,6 @@ struct ticket {
 
 struct train_roll {
     int type, tr, tk;
-
-    friend bool operator<(const train_roll &lhs, const train_roll &rhs) {
-        return lhs.type < rhs.type;
-    }
-
-    friend bool operator>(const train_roll &lhs, const train_roll &rhs) {
-        return lhs.type > rhs.type;
-    }
-
-    friend bool operator==(const train_roll &lhs, const train_roll &rhs) {
-        return lhs.type == rhs.type;
-    }
-
-    friend bool operator!=(const train_roll &lhs, const train_roll &rhs) {
-        return lhs.type != rhs.type;
-    }
-
-    friend bool operator<=(const train_roll &lhs, const train_roll &rhs) {
-        return lhs.type <= rhs.type;
-    }
-
-    friend bool operator>=(const train_roll &lhs, const train_roll &rhs) {
-        return lhs.type >= rhs.type;
-    }
 };
 
 class train_management {
@@ -184,7 +160,7 @@ private:
     Database<ticket> train_ticket;
     //找到对应的车票信息
 
-    BPTree<int, train_roll> bpt_train_roll;
+    Database<std::pair<int, train_roll>> data_train_roll;
     //操作类型，车次的idx，票的idx
 
     void sort(
@@ -212,7 +188,7 @@ public:
                          bpt_train_information("bpt_train_information"),
                          train_information("train_information"),
                          train_ticket("train_ticket"),
-                         bpt_train_roll("bpt_train_roll") {}
+                         data_train_roll("data_train_roll") {}
 
     void clean() {
         bpt_station_train.clear();
@@ -261,7 +237,7 @@ public:
         for (int i = 0; i < station_num; i++)
             bpt_station_train.insert(
                     std::pair<int, std::pair<int, int>>(u.stations[i].hashe, std::pair<int, int>(u.hashe, i)));
-        bpt_train_roll.insert(std::pair<int, train_roll>(dfn, (train_roll) {0, tr, tk}));
+        data_train_roll.insert(std::pair<int, train_roll>(dfn, (train_roll) {0, tr, tk}));
         return "0\n";
     }
 
@@ -276,7 +252,7 @@ public:
         for (int i = 0; i < u.station_num; i++)
             bpt_station_train.remove(
                     std::pair<int, std::pair<int, int>>(u.stations[i].hashe, std::pair<int, int>(u.hashe, i)));
-        bpt_train_roll.insert(std::pair<int, train_roll>(dfn, (train_roll) {1, x.second.first, x.second.second}));
+        data_train_roll.insert(std::pair<int, train_roll>(dfn, (train_roll) {1, x.second.first, x.second.second}));
         return "0\n";
     }
 
@@ -289,7 +265,7 @@ public:
         if (u.release) return "-1\n"; //车次已发布
         u.release = 1;
         train_information.modify(u, x.second.first);
-        bpt_train_roll.insert(std::pair<int, train_roll>(dfn, (train_roll) {2, x.second.first, x.second.second}));
+        data_train_roll.insert(std::pair<int, train_roll>(dfn, (train_roll) {2, x.second.first, x.second.second}));
         return "0\n";
     }
 
@@ -469,9 +445,9 @@ public:
     }
 
     void rollback(const int &pre) {
-        while(bpt_train_roll.size()){
-            std::pair<int, train_roll> v=bpt_train_roll.find_max();
-            if (v.first<pre) break;
+        while (data_train_roll.size()) {
+            std::pair<int, train_roll> v = data_train_roll.back();
+            if (v.first < pre) break;
             train_roll u = v.second;
             if (u.type == 0) {
                 train x = train_information.find(u.tr);
@@ -492,7 +468,7 @@ public:
                 x.release = 0;
                 train_information.modify(x, u.tr);
             }
-            bpt_train_roll.remove(v);
+            data_train_roll.pop_back();
         }
     }
 } trainManagement;

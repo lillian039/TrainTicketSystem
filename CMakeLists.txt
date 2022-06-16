@@ -8,14 +8,14 @@ include_directories(back_end)
 include_directories(sjtu_hpp_library)
 
 add_executable(code
-        back_end_normal/bptree.hpp
-        back_end_normal/bufferList.hpp
-        back_end_normal/database.hpp
-        back_end_normal/main.cpp
-        back_end_normal/order.hpp
-        back_end_normal/parser.hpp
-        back_end_normal/train.hpp
-        back_end_normal/user.hpp
+        back_end_rollback/bptree_roll.hpp
+        back_end_rollback/bufferList.hpp
+        back_end_rollback/database.hpp
+        back_end_rollback/main.cpp
+        back_end_rollback/order.hpp
+        back_end_rollback/parser.hpp
+        back_end_rollback/train.hpp
+        back_end_rollback/user.hpp
         sjtu_hpp_library/date.hpp
         sjtu_hpp_library/exceptions.hpp
         sjtu_hpp_library/linked_hashmap.hpp
