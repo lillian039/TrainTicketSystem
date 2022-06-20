@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="dist/semantic.min.css">
+    <script src="dist/semantic.min.js"></script>
+    <style>
+        body {
+            background-image:url("img/img2.png");
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+        body > .grid {
+            height: 100%;
+        }
+        .image {
+            margin-top: -100px;
+        }
+        .column {
+            max-width: 500px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="ui middle aligned center aligned grid">
+    <div class="column">
+        <div class="ui raised segment">
+            <form class="ui large form" name="input" action="php/modify.php" method="post">
+                <br/>
+                <h2 class="ui image header">
+                    <div class="huge content">
+                        Modify
+                    </div>
+                </h2>
+                <p class="center">
+                    请输入账号以修改信息，无需修改的地方缺省即可，最后请输入密码确定</br>
+                </p>
+                <div class="field">
+                    <div class="ui left icon input">
+                        <i class="user icon"></i>
+                        <input type="text" name="id" placeholder="请输入用户名">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui left icon input">
+                        <i class="address card icon"></i>
+                        <input type="text" name="name" placeholder="请输入修改后的用户真实姓名">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui left icon input">
+                        <i class="envelope icon"></i>
+                        <input type="text" name="email" placeholder="请输入修改后的用户邮箱">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui left icon input">
+                        <i class="lock icon"></i>
+                        <input type="password" name="password" placeholder="请输入修改后的8位及以上密码">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="ui left icon input">
+                        <i class="lock icon"></i>
+                        <input type="password" name="password_pre" placeholder="请输入修改前的8位及以上密码">
+                    </div>
+                </div>
+                <input class="ui fluid large violet submit button" type="submit" value="Confirm Modify">
+                <br/>
+                <div class="ui error message"></div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

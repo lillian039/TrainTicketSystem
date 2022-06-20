@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="dist/semantic.min.css">
+    <script src="dist/semantic.min.js"></script>
+    <style>
+        body {
+            background-image: url("img/img2.png");
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+
+        body > .grid {
+            height: 100%;
+        }
+
+        .image {
+            margin-top: -100px;
+        }
+
+        .column {
+            max-width: 1000px;
+        }
+    </style>
+
+    <script>
+        $(document)
+            .ready(function () {
+                $('.ui.calendar').calendar({
+                    type: 'date'
+                });
+                // fix menu when passed
+            })
+        ;
+    </script>
+</head>
+
+<body>
+
+<div class="ui middle aligned center aligned grid">
+    <div class="column">
+        <div class="ui raised segment">
+            <div class="ui large form">
+                <br/>
+                <h2 class="ui image header">
+                    <div class="huge content">
+                        Add Train
+                    </div>
+                </h2>
+                <p class="center">
+                    管理员请输入列车相关信息以添加列车，火车经过的车站数量为2-5</br>
+                </p>
+                <form class="ui form" name="input" action="php/addtrain.php" method="post">
+                    <div class="three fields">
+                        <div class="field">
+                            <div class="ui left icon input">
+                                <i class="train icon"></i>
+                                <!--<label class="floated left">列车id</label>-->
+                                <input type="text" name="train_id" placeholder="请输入列车id">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <!--   <label>座位数</label>-->
+                            <div class="ui left icon input">
+                                <i class="chair icon"></i>
+                                <input type="text" name="seat_num" placeholder="请输入列车座位数">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="ui left icon input">
+                                <i class="building icon"></i>
+                                <!--   <label>经过站数</label>-->
+                                <input type="text" name="station_num" placeholder="请输入火车经过的站点数">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="four fields">
+                        <div class="field">
+                            <!--    <label>售卖起始时间</label>-->
+                            <div class="ui calendar">
+                                <div class="ui input left icon">
+                                    <i class="calendar icon"></i>
+                                    <input type="text" placeholder="请输入开始售票时间" name="start_sale_date">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <!--   <label>售卖终止时间</label>-->
+                            <div class="ui calendar">
+                                <div class="ui input left icon">
+                                    <i class="calendar icon"></i>
+                                    <input type="text" placeholder="请输入截止售票时间" name="end_sale_date">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <!--   <label>售卖终止时间</label>-->
+                            <div class="field">
+                                <div class="ui left icon input">
+                                    <i class="clock icon"></i>
+                                    <!--   <label>经过站数</label>-->
+                                    <input type="text"  placeholder="请输入发车时间，格式为xx:xx" name="start_time">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="ui left icon input">
+                                <i class="truck icon"></i>
+                                <!--   <label>经过站数</label>-->
+                                <input type="text" name="type" placeholder="请输入火车类型">
+                            </div>
+                        </div>
+                    </div>
+                    <table class="ui single line celled table center aligned">
+                        <thead>
+                        <tr>
+                            <th>站名</th>
+                            <th>两站间票价</th>
+                            <th>行驶时间(min)</th>
+                            <th>经停时间(min)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td> <input type="text" name="station1"></td>
+                            <td>--</td>
+                            <td><input type="text" name="travel_time_1"></td>
+                            <td>--</td>
+                        </tr>
+                        <tr>
+                            <td> <input type="text" name="station2"></td>
+                            <td> <input type="text" name="price2"></td></td>
+                            <td><input type="text" name="travel_time_2"></td>
+                            <td><input type="text" name="stop_time_2"></td>
+                        </tr>
+                        <tr>
+                            <td> <input type="text" name="station3"></td>
+                            <td> <input type="text" name="price3"></td></td>
+                            <td><input type="text" name="travel_time_3"></td>
+                            <td><input type="text" name="stop_time_3"></td>
+                        </tr>
+                        <tr>
+                            <td> <input type="text" name="station4"></td>
+                            <td> <input type="text" name="price4"></td></td>
+                            <td><input type="text" name="travel_time_4"></td>
+                            <td><input type="text" name="stop_time_4"></td>
+                        </tr>
+                        <tr>
+                            <td> <input type="text" name="station5"></td>
+                            <td> <input type="text" name="price5"></td></td>
+                            <td>--</td>
+                            <td>--</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <input class="ui fluid large violet submit button" type="submit" value="添加列车">
+                    <br/>
+                    <div class="ui error message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

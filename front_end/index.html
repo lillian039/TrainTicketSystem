@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>火车票系统首页</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="dist/semantic.min.css">
+    <script src="dist/semantic.min.js"></script>
+    <!--<script src="checklogin.js"></script>-->
+    <style>
+        .pusher{
+            background-image:url("img/img2.png") ;
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+        .hidden.menu {
+            display: none;
+        }
+
+        .masthead.segment {
+            min-height: 700px;
+            padding: 1em 0em;
+
+        }
+
+        .masthead .logo.item img {
+            margin-right: 1em;
+        }
+
+        .masthead .ui.menu .ui.button {
+            margin-left: 0.5em;
+        }
+
+        .masthead h1.ui.header {
+            margin-top: 2em;
+            margin-bottom: 0em;
+            font-size: 4em;
+            font-weight: normal;
+        }
+
+        .masthead h2 {
+            font-size: 1.7em;
+            font-weight: normal;
+        }
+
+        /*这是分割条大框*/
+        .ui.vertical.stripe {
+            padding:4em 0em;
+
+        }
+
+        .ui.vertical.stripe h3 {
+            font-size: 2em;
+        }
+
+        .ui.vertical.stripe .button + h3,
+        .ui.vertical.stripe p + h3 {
+            margin-top: 3em;
+        }
+
+        .ui.vertical.stripe .floated.image {
+            clear: both;
+        }
+
+        .ui.vertical.stripe p {
+            font-size: 1.33em;
+        }
+
+        .ui.vertical.stripe .horizontal.divider {
+            margin: 3em 0em;
+        }
+
+        .quote.stripe.segment {
+            padding: 0em;
+        }
+
+        .quote.stripe.segment .grid .column {
+            padding-top: 5em;
+            padding-bottom: 5em;
+        }
+
+        .footer.segment {
+            padding: 5em 0em;
+        }
+
+        .secondary.pointing.menu .toc.item {
+            display: none;
+        }
+
+        @media only screen and (max-width: 700px) {
+
+            .ui.fixed.menu {
+                display: none !important;
+            }
+
+            .secondary.pointing.menu .item,
+            .secondary.pointing.menu .menu {
+                display: none;
+            }
+
+            .secondary.pointing.menu .toc.item {
+                display: block;
+            }
+
+            .masthead.segment {
+                min-height: 350px;
+            }
+
+            .masthead h1.ui.header {
+                font-size: 2em;
+                margin-top: 1.5em;
+            }
+
+            .masthead h2 {
+                margin-top: 0.5em;
+                font-size: 1.5em;
+            }
+        }
+    </style>
+    <script>
+        $(document)
+            .ready(function () {
+                $('.ui.calendar').calendar({
+                    type: 'date'
+                });
+                // fix menu when passed
+                $('.masthead')
+                    .visibility({
+                        once: false,
+                        onBottomPassed: function() {
+                            $('.fixed.menu').transition('fade in');
+                        },
+                        onBottomPassedReverse: function() {
+                            $('.fixed.menu').transition('fade out');
+                        }
+                    })
+                ;
+                // create sidebar and attach to menu open
+                $('.ui.sidebar')
+                    .sidebar('attach events', '.toc.item')
+                ;
+
+                $('.selection.dropdown')
+                    .dropdown()
+                ;
+            })
+        ;
+    </script>
+</head>
+<body>
+
+<!-- Following Menu -->
+<div class="ui large top fixed hidden menu">
+    <div class="ui container">
+        <a class="active item">首页</a>
+        <a class="item" href="modify_user.html">个人信息修改</a>
+        <a class="item" href="query_order.html">个人订单查询</a>
+        <a class="item" href="buy_ticket.html">购票服务</a>
+        <a class="item" href="refund_ticket.html">退票服务</a>
+        <div class="right menu">
+            <div class="item">
+                <a class="ui button" href="log.html">Log in</a>
+            </div>
+            <div class="item">
+                <a class="ui primary button" href="signup.html">Sign Up</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page Contents -->
+<!-- 大标题 首页-->
+<div class="pusher">
+    <div class="ui vertical masthead center aligned segment">
+        <div class="ui container">
+            <div class="ui large secondary inverted pointing menu">
+                <a class="toc item">
+                    <i class="sidebar icon"></i>
+                </a>
+                <a class="active item">首页</a>
+                <a class="item" href="query_order.html">个人订单查询</a>
+                <a class="item" href="modify_user.html">个人信息修改</a>
+                <a class="item" href="buy_ticket.html">购票服务</a>
+                <a class="item" href="refund_ticket.html">退票服务</a>
+                <div class="right item">
+                    <a class="ui inverted button" href="log.html">Log in</a>
+                    <a class="ui inverted button" href="log_out.html">Log out</a>
+                    <a class="ui inverted button" href="signup.html">Sign Up</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="ui text container">
+            <h1 class="ui inverted header">
+                Train Ticket System
+            </h1>
+            <h2 class="ui inverted header">火车票系统大作业 by hky & xjq</br>
+            欢迎来到我们的网页~</h2>
+            <br/>
+           <!-- <a href="test.html">
+                <button class="ui huge inverted basic button">单击进入test.html</button>
+            </a>
+            <a href="cookietest.html">
+                <button class="ui huge inverted basic button">单击进入cookie测试</button>
+            </a>-->
+            <a href="#oneway">
+                <button class="ui huge inverted basic button">查询单程车票</button>
+            </a>
+            <a href="#transfer">
+            <button class="ui huge inverted basic button">查询换乘车票</button>
+            </a>
+            <a href="#trianinform">
+                <button class="ui huge inverted basic button">查询列车信息</button>
+            </a>
+            <br/>
+            <br/>
+            <br/>
+            <a href="#addtrain">
+                <button class="ui huge inverted basic button">添加列车</button>
+            </a>
+            <a href="#deletetrain">
+                <button class="ui huge inverted basic button">删除列车</button>
+            </a>
+            <a href="#releasetrain">
+                <button class="ui huge inverted basic button">发布列车</button>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<!-- 查询单程的页面 -->
+<div id="oneway" class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <!-- 不知道有什么用的文字说明 -->
+            <div class="eight wide column">
+                <h3 class="ui header">输入起始站与终点站以查询列车</h3>
+                <p>仅提供精确站名的查询，本网站为火车票系统的模拟网站，可以自行登录管理员模式，创建列车，创建站点，发布列车，欢迎来玩~</p>
+                <h3 class="ui header">关于起始时间的设定</h3>
+                <p>本网站仅提供六月到八月份的车辆的日期查询，请不要使查询范围超过这个范围~</p>
+            </div>
+            <!-- 查询换乘的窗口 -->
+            <div class="six wide right floated column">
+                <h2>
+                    查询单程车票
+                </h2>
+                <form class="ui form" action="php/oneway.php" method="post">
+                    <div class="field">
+                        <label>出发地点</label>
+                        <input type="text" name="start_oneway" placeholder="请输入起始地址">
+                    </div>
+                    <div class="field">
+                        <label>到达地点</label>
+                        <input type="text" name="arrive_oneway" placeholder="请输入到达地址">
+                    </div>
+                    <div class="field">
+                        <label>Date</label>
+                        <div class="ui calendar">
+                            <div class="ui input left icon">
+                                <i class="calendar icon"></i>
+                                <input type="text" placeholder="Pick up a date" name="date_oneway">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>查询优先级</label>
+                        <div class="ui selection dropdown">
+                            <input type="hidden" name="priority">
+                            <i class="dropdown icon"></i>
+                            <div class="default text">请选择价格最优或时间最优</div>
+                            <div class="menu">
+                                <div class="item" data-value="time">时间最优</div>
+                                <div class="item" data-value="cost">价格最优</div>
+                            </div>
+                        </div>
+                    </div>
+                    </br>
+                    <input class="fluid ui button" type="submit" value="点击查询">
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- 查询换乘的页面 -->
+<div id="transfer" class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <!-- 查询换乘的窗口 -->
+            <div class="six wide left floated column">
+                <h2>
+                    查询换乘车票
+                </h2>
+                <form class="ui form"action="php/transfer.php" method="post" >
+                    <div class="field">
+                        <label>出发地点</label>
+                        <input type="text" name="start_transfer" placeholder="请输入起始地址">
+                    </div>
+                    <div class="field">
+                        <label>到达地点</label>
+                        <input type="text" name="arrive_transfer" placeholder="请输入到达地址">
+                    </div>
+                    <div class="field">
+                        <label>Date</label>
+                        <div class="ui calendar">
+                            <div class="ui input left icon">
+                                <i class="calendar icon"></i>
+                                <input type="text" placeholder="Pick up a date" name="date_transfer">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>查询优先级</label>
+                        <div class="ui selection dropdown">
+                            <input type="hidden" name="priority">
+                            <i class="dropdown icon"></i>
+                            <div class="default text">请选择价格最优或时间最优</div>
+                            <div class="menu">
+                                <div class="item" data-value="time">时间最优</div>
+                                <div class="item" data-value="cost">价格最优</div>
+                            </div>
+                        </div>
+                    </div>
+                    </br>
+                    <input class="fluid ui button" type="submit" value="点击查询">
+                </form>
+
+
+            </div>
+            <!-- 不知道有什么用的文字说明 -->
+            <div class="eight wide column">
+                <h3 class="ui header">输入起始站与终点站以查询列车</h3>
+                <p>提供一次中转站换乘服务~</p>
+                <h3 class="ui header">关于优先级</h3>
+                <p>对于列车换乘，有时间最短，即时间最优与价格最少，即价格最优两种选项</p>
+            </div>
+        <!--    <div class="eight wide column">
+                <img src="img/img2.png">
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<!-- 查询列车信息的页面 -->
+<div id="trianinform" class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <!-- 不知道有什么用的文字说明 -->
+            <div class="six wide center aligned column">
+                <h3 class="ui header">查询列车信息</h3>
+                <p>请输入列车id与想要查询的日期查询列车当天的所有每站的余票信息</p>
+            </div>
+            <!-- 查询列车id的窗口 -->
+            <div class="six wide right floated column">
+                <h2>
+                    查询列车信息
+                </h2>
+                <form class="ui form" action="php/traininform.php" method="post">
+                    <div class="field">
+                        <label>列车id</label>
+                        <input type="text" name="train_id" placeholder="请输入列车id">
+                    </div>
+                    <div class="field">
+                        <label>Date</label>
+                        <div class="ui calendar">
+                            <div class="ui input left icon">
+                                <i class="calendar icon"></i>
+                                <input type="text" placeholder="Pick up a date" name="date_traininform">
+                            </div>
+                        </div>
+                    </div>
+                    </br>
+                    <input class="fluid ui button" type="submit" value="点击查询">
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<br id="addtrain"/>
+<div class="ui vertical stripe segment">
+    <div class="ui text container" ]>
+        <h3 class="ui header" >想要添加列车？点这里！</h3>
+        <p>火车票系统有添加列车，删除列车，发布列车，查询列车，添加用户，删除用户的功能，点击下列按钮，来添加属于你的列车吧~</p>
+        <a class="ui large button" href="addtrain.html">点击添加列车</a>
+        <h4 class="ui horizontal header divider" id="deletetrain">
+            <a href="#releasetrain">成功添加后，快去发布列车吧~</a>
+        </h4>
+        <h3 class="ui header" >想要删除列车？点这里！</h3>
+        <p>只可以删除是已经存在了的列车哦~<br/>并且如果列车已经被发布了，那就不可以被删除了哦~</p>
+        <form class="ui form" action="php/deletetrain.php" method="post">
+            <div class="field">
+                <label>删除列车id</label>
+                <input type="text" name="train_id" placeholder="请输入列车id">
+            </div>
+            </br>
+            <input class="ui large button" type="submit" value="点击删除列车">
+        </form>
+        <h4 class="ui horizontal header divider" id="releasetrain">
+            <a href="#addtrain">无法成功删除?请先插入列车</a>
+        </h4>
+        <h3 class="ui header" >在这里发布列车!</h3>
+        <p class="six wide">添加进系统的列车，一经发布，便可以被查询到啦！<br/>当然列车不可以重复发布哦~</p>
+        <form class="ui form" action="releasetrain.php" method="post">
+            <div class="field">
+                <label>发布列车id</label>
+                <input type="text" name="train_id_release" placeholder="请输入列车id">
+            </div>
+            </br>
+            <input class="ui large button" type="submit" value="点击发布列车">
+        </form>
+        <h4 class="ui horizontal header divider">
+            <a href="#">回到页面顶端</a>
+        </h4>
+        <h3 class="ui header">关于我们</h3>
+        <p>这是2022年火车票系统大作业bonus的前端部分，与已通过正确性的后端逻辑主体进行交互，若对我们的后端部分感兴趣，可以点击下方按钮，进入我们的GitHub仓库</p>
+        <a class="ui large button" href="https://github.com/lillian039/TrainTicketSystem2022">点击按钮进入GitHub</a>
+    </div>
+</div>
+
+
+<div class="ui inverted vertical footer segment">
+    <div class="ui container">
+        <div class="ui stackable inverted divided equal height stackable grid">
+           <!-- <div class="three wide column">
+                <h4 class="ui inverted header">About</h4>
+                <div class="ui inverted link list">
+                    <a href="#" class="item">Sitemap</a>
+                    <a href="#" class="item">Contact Us</a>
+                    <a href="#" class="item">Religious Ceremonies</a>
+                    <a href="#" class="item">Gazebo Plans</a>
+                </div>
+            </div>
+            <div class="three wide column">
+                <h4 class="ui inverted header">Services</h4>
+                <div class="ui inverted link list">
+                    <a href="#" class="item">Banana Pre-Order</a>
+                    <a href="#" class="item">DNA FAQ</a>
+                    <a href="#" class="item">How To Access</a>
+                    <a href="#" class="item">Favorite X-Men</a>
+                </div>
+            </div>
+            <div class="seven wide column">
+                <h4 class="ui inverted header">Footer Header</h4>
+                <p>Extra space for a call to action inside the footer that could help re-engage users.</p>
+            </div>-->
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>

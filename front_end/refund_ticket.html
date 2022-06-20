@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>退票服务</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="dist/semantic.min.css">
+    <script src="dist/semantic.min.js"></script>
+    <style>
+        body {
+            background-image:url("img/img2.png") ;
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+        body > .grid {
+            height: 100%;
+        }
+        .image {
+            margin-top: -100px;
+        }
+        .column {
+            max-width: 500px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="ui middle aligned center aligned grid">
+    <div class="column">
+        <div class="ui raised segment">
+            <form class="ui large form" name="input_user" action="php/refund_ticket.php" method="post">
+                <br/>
+                <h2 class="ui image header">
+                    <div class="huge content">
+                        Refund Ticket
+                    </div>
+                </h2>
+                <p class="center">
+                    输入用户名与要退的订单以进行退票</br>
+                    若没有账号，可以一键注册，也可以选择游客模式
+                </p>
+                <div class="field">
+                    <div class="ui left icon input">
+                        <i class="user icon"></i>
+                        <input type="text" name="username" placeholder="输入用户名">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui left icon input">
+                        <i class="ticket icon"></i>
+                        <input type="text" name="order" placeholder="输入从新到旧要退订的第n个订单">
+                    </div>
+                </div>
+                <input class="ui fluid large violet submit button" type="submit" value="点击退订">
+                <br/>
+                <div class="ui error message"></div>
+            </form>
+            <a href="index.html">
+                <button class="fluid ui button">返回主页</button>
+            </a>
+            <div class="ui message">
+                没有账号？点击 <a href="signup.html">注册</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
